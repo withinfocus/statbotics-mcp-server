@@ -17,7 +17,7 @@ async function runServer(): Promise<void> {
     server = new Server(
       {
         name: 'Statbotics MCP Server',
-        version: '0.9.0',
+        version: '1.0.0',
       },
       {
         capabilities: {
