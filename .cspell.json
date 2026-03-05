@@ -14,5 +14,5 @@
     "/^```[\\s\\S]*?^```/gm",
     "/\\w*\\_\\w*/g"
   ],
-  "words": ["glama", "MCP", "modelcontextprotocol", "withinfocus"]
+  "words": ["glama", "MCP", "modelcontextprotocol", "Statbotics", "withinfocus"]
 }
