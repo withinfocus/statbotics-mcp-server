@@ -1,0 +1,103 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "name": "@withinfocus/statbotics-mcp-server",
+  "version": "0.9.0",
+  "description": "Provides access to the Statbotics API for FIRST Robotics Competition statistical data and predictions. Enables AI assistants and other MCP clients to retrieve FRC team EPA ratings, event predictions, and match analytics.",
+  "maintainers": ["withinfocus"],
+  "homepage": "https://github.com/withinfocus/statbotics-mcp-server",
+  "repository": "https://github.com/withinfocus/statbotics-mcp-server.git",
+  "issues": "https://github.com/withinfocus/statbotics-mcp-server/issues",
+  "license": "MIT",
+  "keywords": [
+    "first-robotics",
+    "frc",
+    "statbotics",
+    "epa",
+    "robotics",
+    "competition-data",
+    "api",
+    "typescript"
+  ],
+  "categories": ["data", "api", "sports"],
+  "installation": {
+    "npm": {
+      "package": "@withinfocus/statbotics-mcp-server"
+    }
+  },
+  "configuration": {
+    "command": "npx",
+    "args": ["-y", "@withinfocus/statbotics-mcp-server"],
+    "env": {}
+  },
+  "capabilities": {
+    "tools": true,
+    "resources": false,
+    "prompts": false
+  },
+  "tools": [
+    {
+      "name": "get_year",
+      "description": "Get statistical data for a specific FRC season year"
+    },
+    {
+      "name": "get_years",
+      "description": "Get statistical data for multiple FRC season years"
+    },
+    {
+      "name": "get_team",
+      "description": "Get statistical data for a specific FRC team"
+    },
+    {
+      "name": "get_teams",
+      "description": "Get statistical data for multiple FRC teams with filtering"
+    },
+    {
+      "name": "get_team_year",
+      "description": "Get a team's statistics for a specific year"
+    },
+    {
+      "name": "get_team_years",
+      "description": "Get team-year statistics with filtering"
+    },
+    {
+      "name": "get_event",
+      "description": "Get statistical data for a specific FRC event"
+    },
+    {
+      "name": "get_events",
+      "description": "Get statistical data for multiple FRC events with filtering"
+    },
+    {
+      "name": "get_team_event",
+      "description": "Get a team's statistics at a specific event"
+    },
+    {
+      "name": "get_team_events",
+      "description": "Get team-event statistics with filtering"
+    },
+    {
+      "name": "get_match",
+      "description": "Get statistical data for a specific match"
+    },
+    {
+      "name": "get_matches",
+      "description": "Get statistical data for multiple matches with filtering"
+    },
+    {
+      "name": "get_team_match",
+      "description": "Get a team's statistics for a specific match"
+    },
+    {
+      "name": "get_team_matches",
+      "description": "Get team-match statistics with filtering"
+    }
+  ],
+  "author": {
+    "name": "Matt Bishop",
+    "email": "matt@withinfocus.com"
+  },
+  "requirements": {
+    "node": "~24",
+    "npm": "~11"
+  }
+}

@@ -1,0 +1,33 @@
+version: 2
+updates:
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "02:00"
+      timezone: "America/New_York"
+    ignore:
+      # Only allow Node 24.x (LTS), block all other versions
+      - dependency-name: "node"
+        versions: ["<24", ">=25"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "02:00"
+      timezone: "America/New_York"
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "02:00"
+      timezone: "America/New_York"
+    ignore:
+      # Ignore all @types/node versions except 24.x
+      - dependency-name: "@types/node"
+        versions: ["<24", ">=25"]

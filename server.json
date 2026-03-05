@@ -1,0 +1,23 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.withinfocus/statbotics",
+  "title": "Statbotics",
+  "description": "Statbotics MCP Server",
+  "websiteUrl": "https://statbotics.io",
+  "repository": {
+    "url": "https://github.com/withinfocus/statbotics-mcp-server",
+    "source": "github"
+  },
+  "version": "0.9.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@withinfocus/statbotics-mcp-server",
+      "version": "0.9.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": []
+    }
+  ]
+}
