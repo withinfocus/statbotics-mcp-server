@@ -1,7 +1,7 @@
 {
   "$schema": "https://glama.ai/mcp/schemas/server.json",
   "name": "@withinfocus/statbotics-mcp-server",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Provides access to the Statbotics API for FIRST Robotics Competition statistical data and predictions. Enables AI assistants and other MCP clients to retrieve FRC team EPA ratings, event predictions, and match analytics.",
   "maintainers": ["withinfocus"],
   "homepage": "https://github.com/withinfocus/statbotics-mcp-server",
