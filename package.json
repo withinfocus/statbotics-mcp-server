@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@withinfocus/statbotics-mcp-server",
   "mcpName": "io.github.withinfocus/statbotics",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Statbotics MCP Server",
   "repository": {
     "type": "git",
