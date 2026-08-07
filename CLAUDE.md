@@ -55,7 +55,7 @@ pnpm run inspect # Launch MCP inspector for debugging
 
 - **Name**: Statbotics MCP Server
 - **Transport**: StdioServerTransport
-- **API**: https://api.statbotics.io/v3/ (no API key required)
+- **API**: <https://api.statbotics.io/v3/> (no API key required)
 
 ## When Working on The Project
 
