@@ -3,10 +3,11 @@
   "version": "0.2",
   "ignorePaths": [
     "**/.cspell.json",
+    "**/.dockerignore",
     "**/.gitignore",
     "**/.git/**",
     "**/node_modules/**",
-    "**/package-lock.json",
+    "**/pnpm-lock.yaml",
     ".github/workflows/*.yml"
   ],
   "ignoreRegExpList": [
@@ -14,5 +15,14 @@
     "/^```[\\s\\S]*?^```/gm",
     "/\\w*\\_\\w*/g"
   ],
-  "words": ["glama", "MCP", "modelcontextprotocol", "Statbotics", "withinfocus"]
+  "words": [
+    "distroless",
+    "glama",
+    "MCP",
+    "modelcontextprotocol",
+    "nonroot",
+    "Statbotics",
+    "unrs",
+    "withinfocus"
+  ]
 }
