@@ -3,9 +3,7 @@
   "name": "@withinfocus/statbotics-mcp-server",
   "version": "1.2.0",
   "description": "Provides access to the Statbotics API for FIRST Robotics Competition statistical data and predictions. Enables AI assistants and other MCP clients to retrieve FRC team EPA ratings, event predictions, and match analytics.",
-  "maintainers": [
-    "withinfocus"
-  ],
+  "maintainers": ["withinfocus"],
   "homepage": "https://github.com/withinfocus/statbotics-mcp-server",
   "repository": "https://github.com/withinfocus/statbotics-mcp-server.git",
   "issues": "https://github.com/withinfocus/statbotics-mcp-server/issues",
@@ -20,11 +18,7 @@
     "api",
     "typescript"
   ],
-  "categories": [
-    "data",
-    "api",
-    "sports"
-  ],
+  "categories": ["data", "api", "sports"],
   "installation": {
     "npm": {
       "package": "@withinfocus/statbotics-mcp-server"
@@ -32,10 +26,7 @@
   },
   "configuration": {
     "command": "npx",
-    "args": [
-      "-y",
-      "@withinfocus/statbotics-mcp-server"
-    ],
+    "args": ["-y", "@withinfocus/statbotics-mcp-server"],
     "env": {}
   },
   "capabilities": {

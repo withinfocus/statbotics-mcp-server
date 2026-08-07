@@ -73,7 +73,7 @@ async function runServer(): Promise<void> {
         `${errorMessage}: ${error instanceof Error ? error.message : error}`,
         server,
       );
-      throw new Error(errorMessage);
+      throw new Error(errorMessage, { cause: error });
     }
 
     // Set up error handlers for the server
