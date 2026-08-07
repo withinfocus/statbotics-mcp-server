@@ -7,13 +7,13 @@ Comprehensive Playwright-based integration tests for the Statbotics MCP Server.
 1. Install dependencies:
 
 ```bash
-npm ci
+pnpm install --frozen-lockfile
 ```
 
 2. Build the project:
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 No API key is required. The Statbotics API is free and open.
@@ -23,19 +23,19 @@ No API key is required. The Statbotics API is free and open.
 ### All Integration Tests
 
 ```bash
-npm run test:integration
+pnpm run test:integration
 ```
 
 ### Debug Mode
 
 ```bash
-npm run test:integration:debug
+pnpm run test:integration:debug
 ```
 
 ### UI Mode
 
 ```bash
-npm run test:integration:ui
+pnpm run test:integration:ui
 ```
 
 ## Test Structure

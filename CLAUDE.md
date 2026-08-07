@@ -6,7 +6,7 @@ Model Context Protocol (MCP) server that provides access to the Statbotics API f
 
 - **Language**: TypeScript with Node.js
 - **Framework**: Model Context Protocol SDK
-- **Package Manager**: npm
+- **Package Manager**: pnpm (version pinned in `packageManager`; settings in `pnpm-workspace.yaml`)
 - **Main Entry**: `src/index.ts`
 - **Build Output**: `dist/`
 - **Transport**: stdio for MCP communication
@@ -42,14 +42,14 @@ The codebase is organized into separate modules for maintainability:
 
 ## Development Commands
 
-npm run build # Build TypeScript to dist/
-npm run lint # Run ESLint and Prettier
-npm run lint:fix # Auto-fix linting issues
-npm test # Run Jest unit tests
-npm run test:watch # Run tests in watch mode
-npm run test:integration # Run Playwright integration tests
-npm run test:all # Run all tests (unit + integration)
-npm run inspect # Launch MCP inspector for debugging
+pnpm run build # Build TypeScript to dist/
+pnpm run lint # Run ESLint and Prettier
+pnpm run lint:fix # Auto-fix linting issues
+pnpm test # Run Jest unit tests
+pnpm run test:watch # Run tests in watch mode
+pnpm run test:integration # Run Playwright integration tests
+pnpm run test:all # Run all tests (unit + integration)
+pnpm run inspect # Launch MCP inspector for debugging
 
 ## MCP Server Details
 
@@ -59,9 +59,9 @@ npm run inspect # Launch MCP inspector for debugging
 
 ## When Working on The Project
 
-1. Always run `npm run build` after making changes
-2. Run `npm run lint` to ensure code quality
-3. Run tests with `npm run test` and `npm run test:integration` before committing
-4. Use `npm run inspect` to debug MCP functionality
+1. Always run `pnpm run build` after making changes
+2. Run `pnpm run lint` to ensure code quality
+3. Run tests with `pnpm run test` and `pnpm run test:integration` before committing
+4. Use `pnpm run inspect` to debug MCP functionality
 5. Follow existing TypeScript patterns and MCP SDK conventions
 6. Keep the separation of concerns: tools -> schemas -> handlers -> tests

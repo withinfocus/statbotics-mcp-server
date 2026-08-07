@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - Node.js 24
-- npm
+- pnpm 11+ (`corepack enable`)
 
 ## Development Setup
 
@@ -12,13 +12,13 @@
 ```bash
 git clone https://github.com/withinfocus/statbotics-mcp-server.git
 cd statbotics-mcp-server
-npm ci
+pnpm install --frozen-lockfile
 ```
 
 ### 2. Build the Project
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 Note: No API key is required. The Statbotics API is freely accessible.
@@ -26,25 +26,25 @@ Note: No API key is required. The Statbotics API is freely accessible.
 ## Development Workflow
 
 1. Make code changes
-2. Build the project: `npm run build`
-3. Run linting: `npm run lint` (fix with `npm run lint:fix`)
-4. Run unit tests: `npm test`
-5. Run integration tests: `npm run test:integration`
+2. Build the project: `pnpm run build`
+3. Run linting: `pnpm run lint` (fix with `pnpm run lint:fix`)
+4. Run unit tests: `pnpm test`
+5. Run integration tests: `pnpm run test:integration`
 6. Ensure both test suites pass before committing
 
 ## Available Commands
 
 ```bash
-npm run build                    # Build TypeScript to dist/
-npm run lint                     # Run ESLint and Prettier
-npm run lint:fix                 # Auto-fix linting issues
-npm test                         # Run Jest unit tests
-npm run test:watch               # Run tests in watch mode
-npm run test:integration         # Run Playwright integration tests
-npm run test:integration:ui      # Run with Playwright UI
-npm run test:integration:debug   # Debug mode
-npm run test:all                 # Run all tests (unit + integration)
-npm run inspect                  # Launch MCP inspector for debugging
+pnpm run build                    # Build TypeScript to dist/
+pnpm run lint                     # Run ESLint and Prettier
+pnpm run lint:fix                 # Auto-fix linting issues
+pnpm test                         # Run Jest unit tests
+pnpm run test:watch               # Run tests in watch mode
+pnpm run test:integration         # Run Playwright integration tests
+pnpm run test:integration:ui      # Run with Playwright UI
+pnpm run test:integration:debug   # Debug mode
+pnpm run test:all                 # Run all tests (unit + integration)
+pnpm run inspect                  # Launch MCP inspector for debugging
 ```
 
 ## Testing
@@ -52,8 +52,8 @@ npm run inspect                  # Launch MCP inspector for debugging
 ### Unit Tests (Jest)
 
 ```bash
-npm test                 # Run once
-npm run test:watch       # Watch mode for development
+pnpm test                 # Run once
+pnpm run test:watch       # Watch mode for development
 ```
 
 Tests are located in `tests/*.spec.ts` and cover:
@@ -66,13 +66,13 @@ Tests are located in `tests/*.spec.ts` and cover:
 ### Integration Tests (Playwright)
 
 ```bash
-npm run test:integration         # Run all integration tests
-npm run test:all                 # Run both unit and integration tests
+pnpm run test:integration         # Run all integration tests
+pnpm run test:all                 # Run both unit and integration tests
 ```
 
 **Requirements:**
 
-- Project must be built first (`npm run build`)
+- Project must be built first (`pnpm run build`)
 
 Always run both test suites when making changes.
 
@@ -108,7 +108,7 @@ Always run both test suites when making changes.
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes following the guidelines above
-4. Run all tests (`npm run test:all`)
+4. Run all tests (`pnpm run test:all`)
 5. Commit your changes (`git commit -m 'Add amazing feature'`)
 6. Push to the branch (`git push origin feature/amazing-feature`)
 7. Open a Pull Request
