@@ -14,7 +14,7 @@
     "url": "https://github.com/withinfocus/statbotics-mcp-server/issues"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.29.0",
+    "@modelcontextprotocol/sdk": "1.30.0",
     "shx": "0.4.0",
     "zod": "4.3.6"
   },
