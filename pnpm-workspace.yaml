@@ -9,5 +9,26 @@ savePrefix: ""
 allowBuilds:
   # Unpacks the bundled web, CLI, and TUI clients that `pnpm run inspect` runs.
   "@modelcontextprotocol/inspector": true
+  # Pulled in by the inspector. Ships prebuilt platform bindings, so the
+  # build-from-source fallback never has to run.
+  "@parcel/watcher": false
   # Selects the prebuilt native binding for the current platform.
   unrs-resolver: true
+
+# Security floors for transitive dependencies. Each is capped to the major
+# its dependent actually declares, so an override never drags in a major
+# that the dependent has not claimed to support. Drop each one once the
+# dependent requires a patched version on its own.
+overrides:
+  # ajv -> fast-uri 3.1.5. Host confusion via percent-encoded scheme
+  # normalization and via skipped IDN canonicalization, plus SSRF via
+  # malformed IPv6 normalization and via repeated hostname percent-decoding.
+  # Fixed in 3.1.6; ajv asks for ^3.0.1.
+  fast-uri: "^3.1.6"
+  # postcss -> nanoid 3.3.17. A custom generator loops indefinitely when the
+  # requested size is zero. Fixed in 3.3.18; postcss asks for ^3.3.17.
+  nanoid: "^3.3.18"
+  # express and body-parser -> qs 6.15.3. Array-limit bypass via bracket-key
+  # comma parsing, and denial of service via an attacker-controlled isBuffer.
+  # Both fixed in 6.16.0; express asks for ^6.14.0, body-parser for ^6.15.2.
+  qs: "^6.16.0"
