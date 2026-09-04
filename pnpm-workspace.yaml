@@ -9,5 +9,18 @@ savePrefix: ""
 allowBuilds:
   # Unpacks the bundled web, CLI, and TUI clients that `pnpm run inspect` runs.
   "@modelcontextprotocol/inspector": true
+  # Pulled in by the inspector. Ships prebuilt platform bindings, so the
+  # build-from-source fallback never has to run.
+  "@parcel/watcher": false
   # Selects the prebuilt native binding for the current platform.
   unrs-resolver: true
+
+# ajv pulls in fast-uri, and 3.1.5 carries four high-severity advisories:
+# host confusion via percent-encoded scheme normalization and skipped IDN
+# canonicalization, plus SSRF via malformed IPv6 normalization and repeated
+# hostname percent-decoding. All four are fixed in 3.1.6. Held to the 3.x
+# line because ajv asks for ^3.0.1; an unbounded floor resolves 4.x and
+# takes a transitive major that ajv has not declared support for. Drop this
+# once ajv requires a patched version on its own.
+overrides:
+  fast-uri: "^3.1.6"
