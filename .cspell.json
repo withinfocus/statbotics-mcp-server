@@ -16,6 +16,7 @@
     "/\\w*\\_\\w*/g"
   ],
   "words": [
+    "cooldown",
     "distroless",
     "glama",
     "MCP",
