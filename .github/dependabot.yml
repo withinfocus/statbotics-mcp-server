@@ -1,4 +1,7 @@
 version: 2
+
+# Dependabot assigns each dependency to the FIRST group whose patterns match,
+# so the specific toolchain groups below must stay ahead of the catch-alls.
 updates:
   - package-ecosystem: "docker"
     directory: "/"
@@ -7,6 +10,8 @@ updates:
       day: "friday"
       time: "02:00"
       timezone: "America/New_York"
+    cooldown:
+      default-days: 1
     ignore:
       # Only allow Node 24.x (LTS), block all other versions
       - dependency-name: "node"
@@ -19,6 +24,14 @@ updates:
       day: "friday"
       time: "02:00"
       timezone: "America/New_York"
+    cooldown:
+      default-days: 1
+    groups:
+      # Workflow pins are cheap to bump and CI validates them, so majors ride
+      # along instead of splitting off into their own pull requests.
+      actions:
+        patterns:
+          - "*"
 
   # The "npm" ecosystem covers pnpm projects and updates pnpm-lock.yaml.
   - package-ecosystem: "npm"
@@ -28,8 +41,57 @@ updates:
       day: "friday"
       time: "02:00"
       timezone: "America/New_York"
-    open-pull-requests-limit: 15
+    open-pull-requests-limit: 10
+    # Packages that ship several releases a week land as one settled pull
+    # request rather than one per intermediate version.
+    cooldown:
+      default-days: 1
     ignore:
       # Ignore all @types/node versions except 24.x
       - dependency-name: "@types/node"
         versions: ["<24", ">=25"]
+    groups:
+      # Toolchain groups take every update type: a major in one of these
+      # packages needs its siblings moved in lockstep anyway.
+      mcp:
+        patterns:
+          - "@modelcontextprotocol/*"
+      linting:
+        patterns:
+          - "eslint"
+          - "@eslint/*"
+          - "typescript-eslint"
+          - "@stylistic/eslint-plugin"
+          - "globals"
+          - "prettier"
+      jest:
+        patterns:
+          - "jest"
+          - "@jest/*"
+          - "@types/jest"
+          - "jest-junit"
+          - "ts-jest"
+      typescript:
+        patterns:
+          - "typescript"
+          - "@types/node"
+      playwright:
+        patterns:
+          - "@playwright/*"
+      # Catch-alls sweep up whatever the toolchain groups missed. Majors are
+      # deliberately excluded so an unreviewed breaking change never hides in
+      # a bulk update.
+      dev-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+        patterns:
+          - "*"
+      prod-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+        patterns:
+          - "*"
