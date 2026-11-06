@@ -1,17 +1,5 @@
 # OSV-Scanner configuration for MegaLinter's REPOSITORY_OSV_SCANNER linter.
-# osv-scanner fails on any advisory, unlike grype (high and above) and trivy
-# (production dependencies only), so these entries only need to live here.
-# Each one is a dev-only dependency with no in-major fix. Remove an entry once
-# its dependent moves to a patched release.
-
-[[IgnoredVulns]]
-id = "GHSA-g3hv-75wg-m249"
-reason = "minimatch 9.x and 10.x are fixed only in 11.0.1. Pulled in by eslint, typescript-eslint, and jest coverage (via glob and test-exclude), which match against patterns from this repository's own config, not attacker input."
-
-[[IgnoredVulns]]
-id = "GHSA-3g3m-2fjr-6pw4"
-reason = "glob 10.x and 13.x are fixed only in 14.0.2. Pulled in by jest and test-exclude, neither of which passes an AbortSignal to glob, so the cancellation bypass has nothing to bypass."
 
 [[IgnoredVulns]]
 id = "GHSA-gcqx-w48m-w2h4"
-reason = "deepmerge <= 4.3.1 has no fixed release. Pulled in by jest-config to merge this repository's own Jest configuration, not untrusted input."
+reason = "deepmerge <= 4.3.1 (the latest) has no fixed release. Pulled in by jest-config, which only merges jest's own config objects, so untrusted input never reaches it. Dev only. Mirrored in pnpm-workspace.yaml auditConfig. Remove once a fixed deepmerge ships."

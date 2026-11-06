@@ -17,14 +17,10 @@ allowBuilds:
 
 # Security floors for transitive dependencies. Each is capped to the major
 # its dependent actually declares, so an override never drags in a major
-# that the dependent has not claimed to support. Drop each one once the
-# dependent requires a patched version on its own.
+# that the dependent has not claimed to support. minimatch and glob are the
+# exceptions, explained below. Drop each one once the dependent requires a
+# patched version on its own.
 overrides:
-  # glob 10 -> minimatch 9 -> brace-expansion 2.1.4. Denial of service via
-  # stack exhaustion on nested brace groups and in comma parsing, and via
-  # quadratic-time expansion. Fixed across 2.1.5 to 2.1.7; minimatch 9 asks
-  # for ^2.0.2. Scoped to 2.x because minimatch 10 uses brace-expansion 5.
-  brace-expansion@2: "^2.1.7"
   # ajv -> fast-uri 3.1.5. Host confusion via percent-encoded scheme
   # normalization and via skipped IDN canonicalization, plus SSRF via
   # malformed IPv6 normalization and via repeated hostname percent-decoding.
@@ -44,3 +40,22 @@ overrides:
   # 6.16.0. 6.16.0 then had a denial of service in stringify with arrayFormat
   # "comma", fixed in 6.16.1. express asks for ^6.16.0.
   qs: "^6.16.1"
+  # eslint, typescript-eslint, and jest's coverage tooling -> minimatch 9 and
+  # 10, and glob 10 and 13. Pattern amplification denial of service in
+  # minimatch (GHSA-g3hv-75wg-m249) and an AbortSignal cancellation bypass in
+  # glob (GHSA-3g3m-2fjr-6pw4), fixed only in minimatch 11.0.1 and glob
+  # 14.0.2 with no backport. These overrides force a transitive major on
+  # purpose. The new majors drop APIs these consumers do not call (makeRe,
+  # the AST class, the debug option) and keep the CommonJS builds jest
+  # requires. Moving minimatch 9 off the tree also retires brace-expansion
+  # 2.1.4 and its three advisories. Dev only.
+  minimatch: "^11.0.1"
+  glob: "^14.0.2"
+
+# jest-config -> deepmerge 4.3.1, the latest release. Prototype poisoning
+# (GHSA-gcqx-w48m-w2h4, low) with no fixed release. jest only merges its own
+# config objects with it, so untrusted input never reaches it. Mirrored in
+# osv-scanner.toml. Remove once a fixed deepmerge ships.
+auditConfig:
+  ignoreGhsas:
+    - GHSA-gcqx-w48m-w2h4
