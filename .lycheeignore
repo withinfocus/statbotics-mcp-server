@@ -1,6 +1,0 @@
-# Regexes for URLs lychee should skip. See https://lychee.cli.rs/.
-
-# Workflow URLs built from GitHub Actions expressions, such as the release
-# download in publish.yml. lychee sees only the text before "${{" and checks
-# https://github.com/$, which 404s.
-^https://github\.com/\$
