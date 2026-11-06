@@ -13,17 +13,22 @@
   "ignoreRegExpList": [
     "/`+([\\s\\S]*?)`+/g",
     "/^```[\\s\\S]*?^```/gm",
-    "/\\w*\\_\\w*/g"
+    "/\\w*\\_\\w*/g",
+    "/GHSA(-[0-9a-z]{4}){3}/g"
   ],
   "words": [
     "cooldown",
+    "deepmerge",
     "distroless",
     "glama",
+    "istanbuljs",
     "MCP",
+    "minimatch",
     "modelcontextprotocol",
     "nonroot",
     "Statbotics",
     "unrs",
+    "Vulns",
     "withinfocus",
     "zizmor"
   ]
