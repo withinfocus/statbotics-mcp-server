@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "statbotics": {
+      "command": "npx",
+      "args": ["-y", "@withinfocus/statbotics-mcp-server@2.0.0"],
+      "env": {
+        "STATBOTICS_API_KEY": "${user_config.statbotics_api_key}",
+        "STATBOTICS_MCP_SKILLS": "off"
+      }
+    }
+  }
+}

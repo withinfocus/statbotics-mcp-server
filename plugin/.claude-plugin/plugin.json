@@ -1,0 +1,25 @@
+{
+  "name": "statbotics",
+  "displayName": "Statbotics",
+  "version": "2.0.0",
+  "description": "FIRST Robotics Competition statistics and predictions from Statbotics, with skills for sizing up an event, checking match odds, tracking a team through a season, and setting season benchmarks.",
+  "author": {
+    "name": "Matt Bishop",
+    "url": "https://github.com/withinfocus"
+  },
+  "homepage": "https://github.com/withinfocus/statbotics-mcp-server",
+  "repository": "https://github.com/withinfocus/statbotics-mcp-server",
+  "license": "MIT",
+  "icon": "./.claude-plugin/icon.png",
+  "keywords": ["frc", "first-robotics", "statbotics", "epa"],
+  "userConfig": {
+    "statbotics_api_key": {
+      "type": "string",
+      "title": "Statbotics API key (optional)",
+      "description": "Optional. A key from statbotics.io/apikey, sent as the X-API-Key header. Leave blank to use the API without a key.",
+      "sensitive": true,
+      "required": false,
+      "default": ""
+    }
+  }
+}

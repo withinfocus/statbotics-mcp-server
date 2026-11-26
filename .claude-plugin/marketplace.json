@@ -1,0 +1,19 @@
+{
+  "name": "statbotics",
+  "description": "Statbotics plugin for FRC statistics and predictions",
+  "owner": {
+    "name": "Matt Bishop",
+    "url": "https://github.com/withinfocus"
+  },
+  "plugins": [
+    {
+      "name": "statbotics",
+      "source": {
+        "source": "git-subdir",
+        "url": "withinfocus/statbotics-mcp-server",
+        "path": "plugin",
+        "ref": "latest"
+      }
+    }
+  ]
+}
