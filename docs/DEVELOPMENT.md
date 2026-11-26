@@ -18,9 +18,9 @@ Building, testing, and contributing to the Statbotics MCP Server.
 
 ## Development Setup
 
-Requires Node.js 24 and pnpm 11. The pnpm version is pinned in the
-`packageManager` field of `package.json`, so `corepack enable` is enough to get
-the right one.
+Requires Node.js 26 and pnpm 12. Node 26 no longer ships corepack, so install
+pnpm with `npm install -g pnpm`. pnpm then switches to the version pinned in the
+`packageManager` field of `package.json` on its own.
 
 ```bash
 # Clone the repository
