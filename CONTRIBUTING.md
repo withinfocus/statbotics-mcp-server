@@ -128,6 +128,7 @@ Always run both test suites when making changes.
 - `tests/utils.spec.ts` - Unit tests for utility functions
 - `tests/in-memory-client.ts` - Test helper that connects an SDK `Client` to `createServer()` over `InMemoryTransport`
 - `tests/skills.spec.ts` - Unit tests for loading and serving skills (fixture in `tests/fixtures/skills/`)
+- `tests/glama.spec.ts` - Guard tests for `glama.json`: tool and skill lists match the tool table and `skills/`, version and Node/pnpm majors match `package.json`
 - `tests/skills-content.spec.ts` - Guard tests for skill content: shared references in sync, only real tool names, `SKILL.md` structure, strict catalog load, and npm packaging
 - `tests/integration/*.spec.ts` - Playwright integration tests for MCP protocol compliance, using a raw JSON-RPC stdio client (`tests/integration/mcp-client.ts`); `tests/integration/skills.spec.ts` uses the SDK `Client` and `SkillsClient` over stdio
 
