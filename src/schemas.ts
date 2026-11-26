@@ -68,7 +68,7 @@ export const EventTypeSchema = z
   .string()
   .optional()
   .describe(
-    'One of: regional, district, district_cmp, champs_div, einstein, or offseason.',
+    'One of: regional, district, district_cmp, champs_div, or einstein.',
   );
 
 export const WeekSchema = z
@@ -178,23 +178,6 @@ export const GetMatchesInputSchema = z.object({
   year: YearSchema.optional().describe('Four-digit year (2002 onwards)'),
   event: EventKeySchema.optional().describe('Event key, e.g. 2024flor'),
   week: WeekSchema,
-  elim: ElimSchema,
-  ...PaginationSortFields,
-});
-
-export const GetTeamMatchInputSchema = z.object({
-  team: TeamNumberSchema,
-  match: MatchKeySchema,
-});
-
-export const GetTeamMatchesInputSchema = z.object({
-  team: TeamNumberSchema.optional().describe(
-    'Team number (no prefix), e.g. 86',
-  ),
-  year: YearSchema.optional().describe('Four-digit year (2002 onwards)'),
-  event: EventKeySchema.optional().describe('Event key, e.g. 2024flor'),
-  week: WeekSchema,
-  match: MatchKeySchema.optional().describe('Match key, e.g. 2024flor_qm20'),
   elim: ElimSchema,
   ...PaginationSortFields,
 });

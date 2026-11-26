@@ -28,7 +28,7 @@ test.describe('MCP Protocol Compliance Tests', () => {
 
     expect(toolsResponse).toHaveProperty('tools');
     expect(toolsResponse.tools).toBeInstanceOf(Array);
-    expect(toolsResponse.tools.length).toBe(14);
+    expect(toolsResponse.tools.length).toBe(12);
 
     for (const tool of toolsResponse.tools) {
       expect(tool).toHaveProperty('name');

@@ -12,8 +12,7 @@ All API inputs are validated using Zod schemas ensuring type safety and consiste
   - [Event Schemas](#event-schemas)
   - [Team Event Schemas](#team-event-schemas)
   - [Match Schemas](#match-schemas)
-  - [Team Match Schemas](#team-match-schemas)
-- [Response Schemas](#response-schemas)
+  - [Response Schemas](#response-schemas)
 - [Schema Validation](#schema-validation)
 
 ## Input Schemas
@@ -39,8 +38,8 @@ All API inputs are validated using Zod schemas ensuring type safety and consiste
 - **`CountrySchema`** - Optional string for country filter
 - **`StateSchema`** - Optional string for state/province filter
 - **`DistrictSchema`** - Optional string for district filter
-- **`EventTypeSchema`** - Optional integer for event type filter
-- **`WeekSchema`** - Optional integer for competition week filter
+- **`EventTypeSchema`** - Optional string: `regional`, `district`, `district_cmp`, `champs_div`, or `einstein`
+- **`WeekSchema`** - Optional integer (0-8) for competition week; 8 is the championship
 - **`ActiveSchema`** - Optional boolean for active team filter
 - **`ElimSchema`** - Optional boolean for elimination match filter
 
@@ -110,27 +109,14 @@ All API inputs are validated using Zod schemas ensuring type safety and consiste
 
 #### `GetMatchesInputSchema`
 
-- `year`, `event`, `team` (optional resource filters)
-- `elim` (optional elimination filter)
-- `metric`, `ascending`, `limit`, `offset` (optional sorting/pagination)
-
-### Team Match Schemas
-
-#### `GetTeamMatchInputSchema`
-
-- `team` (required) - Team number
-- `match` (required) - Match key string
-
-#### `GetTeamMatchesInputSchema`
-
-- `team`, `year`, `event`, `match` (optional resource filters)
-- `elim` (optional elimination filter)
+- `team`, `year`, `event` (optional resource filters)
+- `week`, `elim` (optional week and elimination filters)
 - `metric`, `ascending`, `limit`, `offset` (optional sorting/pagination)
 
 ## Response Schemas
 
-- **`RecordSchema`** - One Statbotics record (a JSON object). Used by the single-record tools: `get_year`, `get_team`, `get_team_year`, `get_event`, `get_team_event`, `get_match`, and `get_team_match`
-- **`RecordListSchema`** - An array of records. Used by the list tools: `get_years`, `get_teams`, `get_team_years`, `get_events`, `get_team_events`, `get_matches`, and `get_team_matches`
+- **`RecordSchema`** - One Statbotics record (a JSON object). Used by the single-record tools: `get_year`, `get_team`, `get_team_year`, `get_event`, `get_team_event`, and `get_match`
+- **`RecordListSchema`** - An array of records. Used by the list tools: `get_years`, `get_teams`, `get_team_years`, `get_events`, `get_team_events`, and `get_matches`
 
 Both keep every field Statbotics returns. A response of the wrong shape (for example, a list where one record was expected) comes back as an `isError: true` tool result.
 

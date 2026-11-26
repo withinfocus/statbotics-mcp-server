@@ -17,7 +17,15 @@
       "transport": {
         "type": "stdio"
       },
-      "environmentVariables": []
+      "environmentVariables": [
+        {
+          "description": "Optional Statbotics API key, sent as the X-API-Key header",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": true,
+          "name": "STATBOTICS_API_KEY"
+        }
+      ]
     }
   ]
 }

@@ -16,7 +16,10 @@ pnpm install --frozen-lockfile
 pnpm run build
 ```
 
-No API key is required. The Statbotics API is free and open.
+An API key is optional. If you have one from
+<https://www.statbotics.io/apikey>, set `STATBOTICS_API_KEY` and the server
+under test sends it. The tests call the live Statbotics API, so they fail when
+the API is down.
 
 ## Running Tests
 
@@ -96,9 +99,10 @@ Test fixtures for automatically managing MCP client lifecycle.
 ## Environment Variables
 
 - `CI`: Affects retry and worker configuration
+- `STATBOTICS_API_KEY`: Optional Statbotics API key, passed through to the server
 
 ## Notes
 
-- No API key is required to run tests
+- An API key is optional when running tests
 - Tests are designed to be resilient to API changes and data availability
 - Run tests in headless mode for CI/CD environments

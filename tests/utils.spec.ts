@@ -17,7 +17,7 @@ describe('Utility functions', () => {
   });
 
   afterEach(() => {
-    // No env vars to clean up for Statbotics
+    delete process.env['STATBOTICS_API_KEY'];
   });
 
   describe('API Request handling', () => {
@@ -154,6 +154,62 @@ describe('Utility functions', () => {
       expect(Array.isArray(result)).toBe(true);
       expect(result).toEqual(mockArray);
     });
+  });
+
+  describe('API key', () => {
+    function sentHeaders(): Record<string, string> {
+      return mockFetch.mock.calls[0]?.[1]?.headers as Record<string, string>;
+    }
+
+    it('should send no X-API-Key header when STATBOTICS_API_KEY is unset', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({}),
+      } as Response);
+
+      const { makeApiRequest } = await import('../src/utils.js');
+      await makeApiRequest('/v3/team/86');
+
+      expect(sentHeaders()).not.toHaveProperty('X-API-Key');
+    });
+
+    it('should send STATBOTICS_API_KEY as the X-API-Key header', async () => {
+      process.env['STATBOTICS_API_KEY'] = ' test-key ';
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({}),
+      } as Response);
+
+      const { makeApiRequest } = await import('../src/utils.js');
+      await makeApiRequest('/v3/team/86');
+
+      expect(sentHeaders()).toMatchObject({ 'X-API-Key': 'test-key' });
+    });
+
+    it('should treat a blank STATBOTICS_API_KEY as unset', async () => {
+      process.env['STATBOTICS_API_KEY'] = '  ';
+
+      const { getApiKey } = await import('../src/utils.js');
+
+      expect(getApiKey()).toBeUndefined();
+    });
+
+    it.each([401, 403])(
+      'should point to STATBOTICS_API_KEY on a %i response',
+      async (status) => {
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status,
+          statusText: '',
+        } as Response);
+
+        const { makeApiRequest } = await import('../src/utils.js');
+
+        await expect(makeApiRequest('/v3/team/86')).rejects.toThrow(
+          `Statbotics API request failed: ${status} for endpoint /v3/team/86. Set STATBOTICS_API_KEY to a key from https://www.statbotics.io/apikey.`,
+        );
+      },
+    );
   });
 
   describe('log function', () => {

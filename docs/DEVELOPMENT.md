@@ -31,7 +31,10 @@ cd statbotics-mcp-server
 pnpm install --frozen-lockfile
 ```
 
-No API key is required. The Statbotics API is free and open.
+An API key is optional. Statbotics accepts an `X-API-Key` header, rate limited
+to 100 requests per minute per key. Get a key at
+<https://www.statbotics.io/apikey> and set it as `STATBOTICS_API_KEY`; the
+server sends it with every request when it is set.
 
 ## Building
 
@@ -74,7 +77,7 @@ pnpm run test:integration:debug   # Debug mode
 Integration tests cover:
 
 - **MCP Protocol**: Server initialization, tool listing, request/response handling
-- **API Endpoints**: All 14 Statbotics API tools with proper parameter validation
+- **API Endpoints**: All 12 Statbotics API tools with proper parameter validation
 - **Error Handling**: Invalid inputs, API failures, missing parameters
 - **Performance**: Response times, concurrent requests
 - **Data Validation**: Schema compliance, consistency across endpoints

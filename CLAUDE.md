@@ -45,7 +45,8 @@ The codebase is organized into separate modules for maintainability:
 
 - `src/utils.ts` - Utility functions
   - `log()` - Writes server logs to stderr (stdout carries the stdio JSON-RPC stream)
-  - `makeApiRequest()` - Makes HTTP requests to the Statbotics API
+  - `getApiKey()` - Reads the optional `STATBOTICS_API_KEY` environment variable
+  - `makeApiRequest()` - Makes HTTP requests to the Statbotics API, with the `X-API-Key` header when a key is set
 
 ### Test Architecture
 
@@ -97,7 +98,7 @@ The integration tests call the live Statbotics API, so they fail when the API is
 - **SDK**: MCP TypeScript SDK v2 (`@modelcontextprotocol/server`; `@modelcontextprotocol/client` is a dev dependency for unit tests)
 - **Server class**: `McpServer`, tools registered with `registerTool()`
 - **Transport**: stdio via `serveStdio()`, which answers both the 2025-era `initialize` handshake and the 2026-07-28 `server/discover` opening
-- **API**: <https://api.statbotics.io/v3/> (no API key required)
+- **API**: <https://api.statbotics.io/v3/>. An API key is optional: `makeApiRequest()` sends `STATBOTICS_API_KEY` as the `X-API-Key` header when it is set
 
 ## How to Add a New Tool
 
