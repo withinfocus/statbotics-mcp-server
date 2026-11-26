@@ -1,6 +1,6 @@
 # Data Schemas
 
-All API inputs are validated using Zod schemas ensuring type safety and consistency.
+All API inputs are validated using Zod schemas ensuring type safety and consistency. Responses are checked for shape before they are returned.
 
 ## Table of Contents
 
@@ -13,6 +13,7 @@ All API inputs are validated using Zod schemas ensuring type safety and consiste
   - [Team Event Schemas](#team-event-schemas)
   - [Match Schemas](#match-schemas)
   - [Team Match Schemas](#team-match-schemas)
+- [Response Schemas](#response-schemas)
 - [Schema Validation](#schema-validation)
 
 ## Input Schemas
@@ -126,9 +127,16 @@ All API inputs are validated using Zod schemas ensuring type safety and consiste
 - `elim` (optional elimination filter)
 - `metric`, `ascending`, `limit`, `offset` (optional sorting/pagination)
 
+## Response Schemas
+
+- **`RecordSchema`** - One Statbotics record (a JSON object). Used by the single-record tools: `get_year`, `get_team`, `get_team_year`, `get_event`, `get_team_event`, `get_match`, and `get_team_match`
+- **`RecordListSchema`** - An array of records. Used by the list tools: `get_years`, `get_teams`, `get_team_years`, `get_events`, `get_team_events`, `get_matches`, and `get_team_matches`
+
+Both keep every field Statbotics returns. A response of the wrong shape (for example, a list where one record was expected) comes back as an `isError: true` tool result.
+
 ## Schema Validation
 
-All inputs are validated to ensure:
+The MCP SDK validates tool arguments against these schemas before a tool runs, and the same schemas produce the JSON Schema clients see in `tools/list`. All inputs are validated to ensure:
 
 - **Type Safety**: Correct data types for all parameters
 - **Range Validation**: Years within valid range, team numbers positive, limits within bounds

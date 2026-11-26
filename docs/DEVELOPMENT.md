@@ -54,8 +54,9 @@ Unit tests cover:
 
 - Schema validation (`tests/schemas.spec.ts`)
 - Utility functions (`tests/utils.spec.ts`)
-- Tool definitions (`tests/tools.spec.ts`)
-- Handler functions (`tests/handlers.spec.ts`)
+- The tool table and `tools/list` output (`tests/tools.spec.ts`)
+- Tool calls through an in-memory SDK client (`tests/handlers.spec.ts`)
+- The server factory (`tests/server.spec.ts`)
 
 ### Integration Tests (Playwright)
 
@@ -68,6 +69,7 @@ pnpm run test:integration:debug   # Debug mode
 **Requirements**:
 
 - Project must be built first (`pnpm run build`)
+- The live Statbotics API must be up; the tests call it directly
 
 Integration tests cover:
 
@@ -137,6 +139,12 @@ pnpm run inspect
 
 Launches the MCP inspector tool for debugging MCP functionality in a browser.
 
+For a quick check without the browser UI, use the inspector's CLI mode:
+
+```bash
+pnpm exec mcp-inspector --cli node dist/index.js --method tools/list
+```
+
 ### Manual Testing
 
 ```bash
@@ -155,6 +163,13 @@ The server provides detailed error messages for:
 - **Statbotics API errors** (not found, server errors, etc.)
 - **Schema validation failures**
 
+Invalid arguments are rejected by the MCP SDK before the Statbotics API is
+called and come back as an `isError: true` tool result starting with `Input
+validation error:`. Statbotics API and response validation failures come back
+as `isError: true` results starting with `Error:`. Calling a tool name that
+does not exist is a JSON-RPC error (`-32602`, `Tool <name> not found`) rather
+than a tool result.
+
 ## Contributing
 
 1. **Fork the repository**
@@ -167,7 +182,7 @@ git checkout -b feature/your-feature-name
 3. **Make your changes**
 
 - Follow existing TypeScript patterns
-- Maintain separation of concerns (tools → schemas → handlers → tests)
+- Maintain separation of concerns: schemas → tool table (`tools.ts`) → execution (`handlers.ts`) → registration (`server.ts`) → tests
 
 4. **Add tests for new functionality**
 
@@ -206,12 +221,19 @@ git push origin feature/your-feature-name
 
 ### Adding a New Tool
 
-1. Define the tool in `src/tools.ts`
-2. Create input schema in `src/schemas.ts`
-3. Implement the handler in `src/handlers.ts`
-4. Add unit tests
-5. Add integration tests
-6. Build and test
+Tools are registered on an `McpServer` from the MCP TypeScript SDK v2
+(`@modelcontextprotocol/server`). Each tool is one `defineTool()` entry in the
+`tools` table in `src/tools.ts`; `createServer()` in `src/server.ts` registers
+every entry with `registerTool()`, and `executeTool()` in `src/handlers.ts`
+runs it.
+
+1. Create the input schema (a `z.object`) in `src/schemas.ts`, and a response schema if `RecordSchema` or `RecordListSchema` isn't enough
+2. Add a `defineTool()` entry to the `tools` table in `src/tools.ts` with `name`, `title`, `description`, `inputSchema`, `endpoint`, and `responseSchema`
+3. Add unit tests, including the tool's path in `EXPECTED_ENDPOINTS` in `tests/tools.spec.ts`
+4. Add integration tests
+5. Build and test
+
+See the "How to Add a New Tool" section of [CLAUDE.md](../CLAUDE.md) for a worked example.
 
 ## Related Links
 
