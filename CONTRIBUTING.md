@@ -45,6 +45,7 @@ pnpm run test:integration:ui      # Run with Playwright UI
 pnpm run test:integration:debug   # Debug mode
 pnpm run test:all                 # Run all tests (unit + integration)
 pnpm run inspect                  # Launch MCP inspector for debugging
+pnpm run skills:sync              # Copy shared skill references into every skill
 ```
 
 ## Testing
@@ -83,11 +84,12 @@ Always run both test suites when making changes.
 ### Source Code
 
 - `src/index.ts` - Main server entry point
-  - Serves the MCP server over stdio with `serveStdio(() => createServer(version))`
+  - Loads the skills catalog once at startup (`loadScoutingSkills`), unless `STATBOTICS_MCP_SKILLS` turns skills off
+  - Serves the MCP server over stdio with `serveStdio(() => createServer(version, { skills }))`
   - Handles error logging and process lifecycle
 
 - `src/server.ts` - Server factory
-  - Exports `createServer(version)`, which builds an `McpServer` (from `@modelcontextprotocol/server`) and calls `registerTool()` once per entry in the `tools` table
+  - Exports `createServer(version, { skills })`, which builds an `McpServer` (from `@modelcontextprotocol/server`), calls `registerTool()` once per entry in the `tools` table, and attaches the skills catalog when one is given
   - Exports `SERVER_INSTRUCTIONS`, the short guidance sent to clients
   - Returns the server unconnected, so extensions can be attached before `serveStdio` connects it
 
@@ -107,6 +109,11 @@ Always run both test suites when making changes.
   - Tool input schemas: `Get*InputSchema` (one `z.object` per tool)
   - API response schemas: `RecordSchema` and `RecordListSchema`
 
+- `src/skills.ts` - Skills loader
+  - Exports `skillsRootFor(moduleUrl)`, which resolves the package's `skills/` folder from a module URL (`dist/index.js` at runtime)
+  - Exports `skillsEnabled()`, which is false when `STATBOTICS_MCP_SKILLS` is `off`, `false` or `0`
+  - Exports `loadScoutingSkills(root, { strict })`, which loads `skills/` into a `SkillCatalog` with `loadSkills` from `@modelcontextprotocol/server/ext/skills/node`. Failures are logged and return `undefined`, so the server starts without skills instead of crashing
+
 - `src/utils.ts` - Utility functions
   - `log()` - Writes server logs to stderr (stdout carries the stdio JSON-RPC stream)
   - `getApiKey()` - Reads the optional `STATBOTICS_API_KEY` environment variable
@@ -120,11 +127,22 @@ Always run both test suites when making changes.
 - `tests/schemas.spec.ts` - Unit tests for all Zod schemas
 - `tests/utils.spec.ts` - Unit tests for utility functions
 - `tests/in-memory-client.ts` - Test helper that connects an SDK `Client` to `createServer()` over `InMemoryTransport`
-- `tests/integration/*.spec.ts` - Playwright integration tests for MCP protocol compliance, using a raw JSON-RPC stdio client (`tests/integration/mcp-client.ts`)
+- `tests/skills.spec.ts` - Unit tests for loading and serving skills (fixture in `tests/fixtures/skills/`)
+- `tests/skills-content.spec.ts` - Guard tests for skill content: shared references in sync, only real tool names, `SKILL.md` structure, strict catalog load, and npm packaging
+- `tests/integration/*.spec.ts` - Playwright integration tests for MCP protocol compliance, using a raw JSON-RPC stdio client (`tests/integration/mcp-client.ts`); `tests/integration/skills.spec.ts` uses the SDK `Client` and `SkillsClient` over stdio
+
+### Skills
+
+- `skills/<name>/` - Analytics skills served over MCP (`SKILL.md` plus `references/`), shipped in the npm package and Docker image
+- `skills-src/shared/` - Shared reference files, copied into each skill by `scripts/sync-skills.mjs` (`pnpm run skills:sync`)
 
 ### Adding a New Tool
 
 A tool is one `defineTool()` entry in the `tools` table in `src/tools.ts`, with no handler to write. The steps, with examples, are in the "How to Add a New Tool" section of [CLAUDE.md](CLAUDE.md).
+
+### Adding or Editing a Skill
+
+Skills live in `skills/<name>/SKILL.md`, with shared references kept once in `skills-src/shared/`. After editing a shared reference, run `pnpm run skills:sync` and commit the copies. The rules and guard tests are in the "How to Add or Edit a Skill" section of [CLAUDE.md](CLAUDE.md).
 
 ## Code Standards
 
