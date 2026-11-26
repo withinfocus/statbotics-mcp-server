@@ -10,7 +10,6 @@ Tools for accessing the Statbotics API. All tools validate input parameters and 
 - [Event Tools](#event-tools)
 - [Team Event Tools](#team-event-tools)
 - [Match Tools](#match-tools)
-- [Team Match Tools](#team-match-tools)
 - [Common Parameters](#common-parameters)
 - [Data Response Formats](#data-response-formats)
 - [Common Patterns](#common-patterns)
@@ -80,7 +79,7 @@ Get detailed information about a specific FRC event.
 
 Get a list of events with optional filtering, sorting, and pagination.
 
-- **Parameters**: `year` (number, optional), `country` (string, optional), `state` (string, optional), `district` (string, optional), `type` (number, optional), `week` (number, optional), `metric` (string, optional), `ascending` (boolean, optional), `limit` (number, optional), `offset` (number, optional)
+- **Parameters**: `year` (number, optional), `country` (string, optional), `state` (string, optional), `district` (string, optional), `type` (string, optional), `week` (number, optional), `metric` (string, optional), `ascending` (boolean, optional), `limit` (number, optional), `offset` (number, optional)
 - **Returns**: Array of event objects
 
 ## Team Event Tools
@@ -97,7 +96,7 @@ Get a team's performance at a specific event.
 
 Get team-event records with optional filtering, sorting, and pagination.
 
-- **Parameters**: `team` (number, optional), `year` (number, optional), `event` (string, optional), `country` (string, optional), `state` (string, optional), `district` (string, optional), `type` (number, optional), `week` (number, optional), `metric` (string, optional), `ascending` (boolean, optional), `limit` (number, optional), `offset` (number, optional)
+- **Parameters**: `team` (number, optional), `year` (number, optional), `event` (string, optional), `country` (string, optional), `state` (string, optional), `district` (string, optional), `type` (string, optional), `week` (number, optional), `metric` (string, optional), `ascending` (boolean, optional), `limit` (number, optional), `offset` (number, optional)
 - **Returns**: Array of team-event objects
 
 ## Match Tools
@@ -114,25 +113,8 @@ Get detailed information about a specific FRC match.
 
 Get a list of matches with optional filtering, sorting, and pagination.
 
-- **Parameters**: `year` (number, optional), `event` (string, optional), `team` (number, optional), `elim` (boolean, optional), `metric` (string, optional), `ascending` (boolean, optional), `limit` (number, optional), `offset` (number, optional)
+- **Parameters**: `team` (number, optional), `year` (number, optional), `event` (string, optional), `week` (number, optional), `elim` (boolean, optional), `metric` (string, optional), `ascending` (boolean, optional), `limit` (number, optional), `offset` (number, optional)
 - **Returns**: Array of match objects
-
-## Team Match Tools
-
-### `get_team_match`
-
-Get a team's performance in a specific match.
-
-- **Parameters**: `team` (number), `match` (string)
-- **Returns**: Team-match data including alliance position and EPA contributions
-- **Example**: `get_team_match(team: 86, match: "2024flor_qm20")`
-
-### `get_team_matches`
-
-Get team-match records with optional filtering, sorting, and pagination.
-
-- **Parameters**: `team` (number, optional), `year` (number, optional), `event` (string, optional), `match` (string, optional), `elim` (boolean, optional), `metric` (string, optional), `ascending` (boolean, optional), `limit` (number, optional), `offset` (number, optional)
-- **Returns**: Array of team-match objects
 
 ## Common Parameters
 
@@ -151,10 +133,10 @@ List tools support various filters depending on the resource type:
 
 - **`country`** (string): Filter by country name
 - **`state`** (string): Filter by state/province
-- **`district`** (string): Filter by district key
+- **`district`** (string): Filter by district abbreviation: `ca`, `fch`, `fim`, `fin`, `fit`, `fma`, `fnc`, `fsc`, `isr`, `ne`, `ont`, `pch`, `pnw`, or `win`
 - **`active`** (boolean): Filter by active/inactive status (teams only)
-- **`type`** (number): Filter by event type (events only)
-- **`week`** (number): Filter by competition week (events only)
+- **`type`** (string): Filter by event type: `regional`, `district`, `district_cmp`, `champs_div`, or `einstein` (events and team events)
+- **`week`** (number, 0-8): Filter by competition week; 8 is the championship (events, team events, and matches)
 - **`elim`** (boolean): Filter by elimination vs qualification matches (matches only)
 
 ## Data Response Formats
@@ -171,7 +153,7 @@ All responses include EPA (Expected Points Added) statistics where applicable.
 ### Find a team's performance at a specific event
 
 1. Use `get_team_event` to get their overall event performance
-2. Use `get_team_matches` with `team` and `event` filters to see individual matches
+2. Use `get_matches` with `team` and `event` filters to see the matches they played
 
 ### Analyze an event
 

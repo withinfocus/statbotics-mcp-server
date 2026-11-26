@@ -32,15 +32,13 @@ test.describe('MCP Server Functionality Tests', () => {
       'get_team_events',
       'get_match',
       'get_matches',
-      'get_team_match',
-      'get_team_matches',
     ];
 
     for (const expectedTool of expectedCoreTools) {
       expect(toolNames).toContain(expectedTool);
     }
 
-    expect(toolNames.length).toBe(14);
+    expect(toolNames.length).toBe(12);
   });
 
   test('should have properly structured tool schemas', async () => {

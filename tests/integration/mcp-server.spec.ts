@@ -28,7 +28,7 @@ test.describe('Statbotics MCP Server Integration Tests', () => {
     const toolsResponse = await mcpClient.listTools();
 
     expect(toolsResponse.tools).toBeInstanceOf(Array);
-    expect(toolsResponse.tools.length).toBe(14);
+    expect(toolsResponse.tools.length).toBe(12);
 
     const toolNames = toolsResponse.tools.map(
       (tool: { name: string }) => tool.name,
@@ -47,8 +47,6 @@ test.describe('Statbotics MCP Server Integration Tests', () => {
       'get_team_events',
       'get_match',
       'get_matches',
-      'get_team_match',
-      'get_team_matches',
     ];
 
     for (const expectedTool of expectedTools) {

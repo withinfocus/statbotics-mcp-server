@@ -26,14 +26,11 @@ const EXPECTED_ENDPOINTS: Record<string, string> = {
   get_team_events: '/v3/team_events?team=86&year=2024&event=2024flor',
   get_match: '/v3/match/2024flor_qm20',
   get_matches: '/v3/matches?team=86&year=2024&event=2024flor',
-  get_team_match: '/v3/team_match/86/2024flor_qm20',
-  get_team_matches:
-    '/v3/team_matches?team=86&year=2024&event=2024flor&match=2024flor_qm20',
 };
 
 describe('Tool table', () => {
-  it('should define all 14 tools', () => {
-    expect(tools).toHaveLength(14);
+  it('should define all 12 tools', () => {
+    expect(tools).toHaveLength(12);
   });
 
   it('should have unique tool names', () => {
@@ -192,13 +189,6 @@ describe('Tool definitions served by tools/list', () => {
       const getTool = find('get_match');
       expect(getTool?.description).toContain('match');
       expect(getTool?.inputSchema.required).toEqual(['match']);
-    });
-
-    it('should have get_team_match tool', () => {
-      expect(find('get_team_match')?.inputSchema.required).toEqual([
-        'team',
-        'match',
-      ]);
     });
   });
 

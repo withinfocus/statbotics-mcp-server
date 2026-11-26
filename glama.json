@@ -27,7 +27,13 @@
   "configuration": {
     "command": "npx",
     "args": ["-y", "@withinfocus/statbotics-mcp-server"],
-    "env": {}
+    "env": {
+      "STATBOTICS_API_KEY": {
+        "description": "Optional Statbotics API key (get one at https://www.statbotics.io/apikey)",
+        "required": false,
+        "type": "string"
+      }
+    }
   },
   "capabilities": {
     "tools": true,
@@ -82,14 +88,6 @@
     {
       "name": "get_matches",
       "description": "Get statistical data for multiple matches with filtering"
-    },
-    {
-      "name": "get_team_match",
-      "description": "Get a team's statistics for a specific match"
-    },
-    {
-      "name": "get_team_matches",
-      "description": "Get team-match statistics with filtering"
     }
   ],
   "author": {
@@ -97,7 +95,7 @@
     "email": "matt@withinfocus.com"
   },
   "requirements": {
-    "node": "~24",
+    "node": "~26",
     "npm": "~11"
   }
 }

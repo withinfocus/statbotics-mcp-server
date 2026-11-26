@@ -16,8 +16,6 @@ import {
   GetTeamEventsInputSchema,
   GetMatchInputSchema,
   GetMatchesInputSchema,
-  GetTeamMatchInputSchema,
-  GetTeamMatchesInputSchema,
   RecordSchema,
   RecordListSchema,
 } from '../src/schemas.js';
@@ -230,27 +228,6 @@ describe('Schema validation', () => {
           elim: false,
         }),
       ).not.toThrow();
-    });
-  });
-
-  describe('GetTeamMatchInputSchema', () => {
-    it('should validate team match input', () => {
-      expect(() =>
-        GetTeamMatchInputSchema.parse({
-          team: 86,
-          match: '2024flor_qm20',
-        }),
-      ).not.toThrow();
-    });
-
-    it('should reject missing fields', () => {
-      expect(() => GetTeamMatchInputSchema.parse({ team: 86 })).toThrow();
-    });
-  });
-
-  describe('GetTeamMatchesInputSchema', () => {
-    it('should validate empty input', () => {
-      expect(() => GetTeamMatchesInputSchema.parse({})).not.toThrow();
     });
   });
 

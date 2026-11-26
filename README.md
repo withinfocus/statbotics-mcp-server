@@ -9,7 +9,7 @@ A Model Context Protocol (MCP) server that provides access to the Statbotics API
 - **Match Analytics**: Retrieve match predictions, results, and team-level match statistics
 - **Year-over-Year Data**: Query statistical trends from 2002 to the current year
 - **Type Safety**: All responses validated with Zod schemas
-- **No API Key Required**: Statbotics API is freely accessible
+- **API Key Optional**: Works without a key; set `STATBOTICS_API_KEY` to send one
 
 ## Installation
 
@@ -73,6 +73,31 @@ Add to your MCP client configuration:
 }
 ```
 
+### API Key (Optional)
+
+The server works without an API key. Statbotics also accepts an `X-API-Key`
+header, rate limited to 100 requests per minute per key. To send one, get a key
+at <https://www.statbotics.io/apikey> and set `STATBOTICS_API_KEY`:
+
+```json
+{
+  "mcpServers": {
+    "statbotics": {
+      "command": "npx",
+      "args": ["-y", "@withinfocus/statbotics-mcp-server"],
+      "env": {
+        "STATBOTICS_API_KEY": "your-key-here"
+      }
+    }
+  }
+}
+```
+
+With Docker, add `"-e", "STATBOTICS_API_KEY"` to `args` before the image name
+and set the variable in `env` the same way.
+
+If Statbotics answers 401 or 403, the error message points to this setting.
+
 ## Available Tools
 
 ### Year Tools (2 tools)
@@ -111,12 +136,6 @@ Retrieve match data and predictions.
 
 **Tools**: `get_match`, `get_matches`
 
-### Team Match Tools (2 tools)
-
-Get team-level match statistics.
-
-**Tools**: `get_team_match`, `get_team_matches`
-
 ## Quick Examples
 
 ### Get team information
@@ -145,8 +164,8 @@ get_team_events(event: "2024flor")
 // Get match predictions and results
 get_match(match: "2024flor_qm20")
 
-// Get team's performance in a match
-get_team_match(team: 86, match: "2024flor_qm20")
+// Get every match a team played at an event
+get_matches(team: 86, event: "2024flor")
 ```
 
 ## Contributing

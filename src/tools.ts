@@ -15,8 +15,6 @@ import {
   GetTeamEventsInputSchema,
   GetMatchInputSchema,
   GetMatchesInputSchema,
-  GetTeamMatchInputSchema,
-  GetTeamMatchesInputSchema,
 } from './schemas.js';
 
 /**
@@ -214,7 +212,7 @@ export const tools: readonly ToolDefinition[] = [
       'event keys and browsing the season schedule. ' +
       'Returns an array of events with name, key, dates, location, week, type, EPA stats, and predictions. ' +
       'Filter by `year` (4-digit, >=2002), `country`, `state`, `district`, `type` ' +
-      '(regional, district, district_cmp, champs_div, einstein, offseason), and `week` ' +
+      '(regional, district, district_cmp, champs_div, einstein), and `week` ' +
       '(0-8 of the season; 8 = championship). ' +
       'Sort with `metric`/`ascending` and paginate with `limit`/`offset`. ' +
       'Use this to answer "what regionals were in California in 2024?", "list all week 1 events this year", ' +
@@ -247,7 +245,7 @@ export const tools: readonly ToolDefinition[] = [
       "one team's performance at one event (rank, record, EPA, awards). " +
       'Filter any combination of `team` (one team across all events), `year`, `event` (all teams at one event - ' +
       "great for getting an event's full team list with stats), `country`, `state`, `district`, " +
-      '`type` (regional, district, district_cmp, champs_div, einstein, offseason), and `week` (0-8). ' +
+      '`type` (regional, district, district_cmp, champs_div, einstein), and `week` (0-8). ' +
       'Sort with `metric`/`ascending` and paginate with `limit`/`offset`. ' +
       'Use this to answer "show every event team 254 has attended in 2024", "list all teams at 2024flor with their ranks", ' +
       'or "rank teams by EPA across all 2024 district championships".',
@@ -284,41 +282,9 @@ export const tools: readonly ToolDefinition[] = [
       'false for qualifications only). ' +
       'Sort with `metric`/`ascending` and paginate with `limit`/`offset`. ' +
       'Use this to answer "show all of team 254\'s matches in 2024", "list every elim match at 2024cmptx", ' +
-      'or "find the highest-scoring matches of week 6". ' +
-      "For per-team match contributions (a team's individual EPA in a match), use get_team_matches.",
+      'or "find the highest-scoring matches of week 6".',
     inputSchema: GetMatchesInputSchema,
     endpoint: (args) => `/v3/matches${buildQueryString(args)}`,
-    responseSchema: RecordListSchema,
-  }),
-  defineTool({
-    name: 'get_team_match',
-    title: 'Get FRC Team Contribution in Match (Single Team-Match)',
-    description:
-      "Get a single team's contribution to a single FIRST Robotics Competition (FRC) match - the per-robot " +
-      'view of one match. ' +
-      "Returns which alliance the team was on (red/blue), the team's EPA going into the match, the team's " +
-      'predicted score contribution by component, and post-match outcome flags. ' +
-      'Useful for scouting and post-match analysis: "how much did team 2056 contribute to alliance score in ' +
-      '2024onham_sf2m1?". ' +
-      'Requires both `team` (integer, no prefix) and `match` (match key like "2024flor_qm20"). ' +
-      'For listing many team-match rows, use get_team_matches.',
-    inputSchema: GetTeamMatchInputSchema,
-    endpoint: ({ team, match }) => `/v3/team_match/${team}/${match}`,
-    responseSchema: RecordSchema,
-  }),
-  defineTool({
-    name: 'get_team_matches',
-    title: 'List/Search FRC Team-Match Contributions',
-    description:
-      'List per-team match contributions across many FIRST Robotics Competition (FRC) matches. Each row is ' +
-      "one team's involvement in one match (alliance, pre-match EPA, predicted contribution, outcome). " +
-      "Filter by `team` (one team's entire match log), `year`, `event`, `week` (0-8), `match` (a single " +
-      'match key - returns one row per team in that match), and `elim` (true for elimination matches only). ' +
-      'Sort with `metric`/`ascending` and paginate with `limit`/`offset`. ' +
-      'Use this to build a scouting timeline ("every match team 254 played in 2024 with their EPA contribution"), ' +
-      'compare alliance partners, or compute per-team averages over a range of matches.',
-    inputSchema: GetTeamMatchesInputSchema,
-    endpoint: (args) => `/v3/team_matches${buildQueryString(args)}`,
     responseSchema: RecordListSchema,
   }),
 ];
