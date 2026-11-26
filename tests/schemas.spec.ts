@@ -18,9 +18,9 @@ import {
   GetMatchesInputSchema,
   GetTeamMatchInputSchema,
   GetTeamMatchesInputSchema,
-  toMCPSchema,
+  RecordSchema,
+  RecordListSchema,
 } from '../src/schemas.js';
-import { z } from 'zod';
 
 describe('Schema validation', () => {
   describe('TeamNumberSchema', () => {
@@ -254,18 +254,23 @@ describe('Schema validation', () => {
     });
   });
 
-  describe('toMCPSchema', () => {
-    it('should convert Zod schema to MCP-compatible JSON Schema', () => {
-      const schema = z.object({
-        name: z.string(),
-        age: z.number().optional(),
-      });
+  describe('Response schemas', () => {
+    it('should accept a record and keep every field', () => {
+      const team = { team: 86, name: 'Team Resistance', epa: { norm: 1600 } };
 
-      const mcpSchema = toMCPSchema(schema);
+      expect(RecordSchema.parse(team)).toEqual(team);
+    });
 
-      expect(mcpSchema.type).toBe('object');
-      expect(mcpSchema.properties).toBeDefined();
-      expect(mcpSchema['$schema']).toBeUndefined();
+    it('should accept a list of records', () => {
+      const teams = [{ team: 86 }, { team: 254 }];
+
+      expect(RecordListSchema.parse(teams)).toEqual(teams);
+    });
+
+    it('should reject the wrong response shape', () => {
+      expect(() => RecordSchema.parse([{ team: 86 }])).toThrow();
+      expect(() => RecordSchema.parse(null)).toThrow();
+      expect(() => RecordListSchema.parse({ team: 86 })).toThrow();
     });
   });
 

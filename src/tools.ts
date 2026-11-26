@@ -1,6 +1,8 @@
-import { Tool } from '@modelcontextprotocol/sdk/types.js';
+import { z } from 'zod';
+import type { ToolAnnotations } from '@modelcontextprotocol/server';
 import {
-  toMCPSchema,
+  RecordSchema,
+  RecordListSchema,
   GetYearInputSchema,
   GetYearsInputSchema,
   GetTeamInputSchema,
@@ -17,20 +19,83 @@ import {
   GetTeamMatchesInputSchema,
 } from './schemas.js';
 
-// All Statbotics tools are read-only HTTP GETs against the public
-// https://api.statbotics.io/v3/ API. They never mutate state, so we mark
-// them readOnly + idempotent. openWorldHint=true reflects that results
-// reflect live external data that can change over time.
-const readOnlyAnnotations = {
+/**
+ * Annotations shared by every tool. All Statbotics tools are read-only HTTP
+ * GETs against the public https://api.statbotics.io/v3/ API: they never
+ * mutate state, and repeating a call is safe. openWorldHint is set because
+ * results come from live external data that can change over time.
+ */
+export const READ_ONLY_API: ToolAnnotations = {
   readOnlyHint: true,
   destructiveHint: false,
   idempotentHint: true,
   openWorldHint: true,
-} as const;
+};
 
-export const tools: Tool[] = [
-  {
+/**
+ * One MCP tool, backed by a single Statbotics API GET endpoint.
+ *
+ * `inputSchema` is registered with the MCP SDK as-is: the SDK converts it to
+ * JSON Schema for `tools/list` and validates `tools/call` arguments against
+ * it before `endpoint` runs. `responseSchema` validates the Statbotics
+ * response.
+ */
+export interface ToolDefinition<Input extends z.ZodObject = z.ZodObject> {
+  /** Tool name exposed to MCP clients (snake_case, e.g. `get_team`). */
+  name: string;
+  /** Human-readable display name. */
+  title: string;
+  /** Description shown to the model when it picks a tool. */
+  description: string;
+  /** Zod object schema for the tool arguments. */
+  inputSchema: Input;
+  /** Builds the Statbotics API path (including `/v3`) from validated arguments. */
+  endpoint(args: z.output<Input>): string;
+  /** Zod schema the Statbotics API response must satisfy. */
+  responseSchema: z.ZodType;
+  /**
+   * Optional post-processing of the validated response, for endpoints whose
+   * raw payload is too large or noisy to hand to a model.
+   */
+  select?(response: unknown, args: z.output<Input>): unknown;
+}
+
+// A table entry before widening: `select` sees the parsed response type.
+type TypedTool<I extends z.ZodObject, R extends z.ZodType> = Omit<
+  ToolDefinition<I>,
+  'responseSchema' | 'select'
+> & {
+  responseSchema: R;
+  select?(response: z.output<R>, args: z.output<I>): unknown;
+};
+
+// Ties each entry's `endpoint` and `select` argument types to its own
+// schemas, then widens it so entries with different schemas fit in one array.
+function defineTool<I extends z.ZodObject, R extends z.ZodType>(
+  definition: TypedTool<I, R>,
+): ToolDefinition {
+  return definition as ToolDefinition;
+}
+
+/**
+ * Builds the query string for the list endpoints. Unset filters are left
+ * out, so Statbotics applies its own defaults.
+ */
+export function buildQueryString(params: Record<string, unknown>): string {
+  const searchParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null) {
+      searchParams.set(key, String(value));
+    }
+  }
+  const qs = searchParams.toString();
+  return qs ? `?${qs}` : '';
+}
+
+export const tools: readonly ToolDefinition[] = [
+  defineTool({
     name: 'get_year',
+    title: 'Get FRC Season Statistics (Single Year)',
     description:
       'Look up Statbotics season summary statistics for a single FIRST Robotics Competition (FRC) year. ' +
       'Returns aggregate metrics for the game played that year: EPA (Expected Points Added) percentile breakpoints ' +
@@ -40,14 +105,13 @@ export const tools: Tool[] = [
       '"what EPA put a team in the top 10% in 2019?", or to calibrate per-year scoring before comparing teams across seasons. ' +
       'Data is available for years 2002 onward; pre-2016 seasons have less detail because the EPA model was less granular. ' +
       'For comparing many seasons in one call, use get_years instead.',
-    annotations: {
-      title: 'Get FRC Season Statistics (Single Year)',
-      ...readOnlyAnnotations,
-    },
-    inputSchema: toMCPSchema(GetYearInputSchema),
-  },
-  {
+    inputSchema: GetYearInputSchema,
+    endpoint: ({ year }) => `/v3/year/${year}`,
+    responseSchema: RecordSchema,
+  }),
+  defineTool({
     name: 'get_years',
+    title: 'List FRC Season Statistics (Multiple Years)',
     description:
       'List Statbotics season summary statistics across multiple FIRST Robotics Competition (FRC) years in a single call. ' +
       'Returns the same per-season aggregates as get_year (EPA percentiles, scoring averages, foul/RP rates, counts) ' +
@@ -56,14 +120,13 @@ export const tools: Tool[] = [
       '"which seasons had the highest top-1% EPA?", or to dump the full season catalog for downstream analysis. ' +
       'Sort with `metric` (any returned column name, e.g. `epa_max`, `score_mean`) and `ascending`; ' +
       'paginate with `limit` (1-1000, default 1000) and `offset`.',
-    annotations: {
-      title: 'List FRC Season Statistics (Multiple Years)',
-      ...readOnlyAnnotations,
-    },
-    inputSchema: toMCPSchema(GetYearsInputSchema),
-  },
-  {
+    inputSchema: GetYearsInputSchema,
+    endpoint: (args) => `/v3/years${buildQueryString(args)}`,
+    responseSchema: RecordListSchema,
+  }),
+  defineTool({
     name: 'get_team',
+    title: 'Get FRC Team Profile (Single Team)',
     description:
       'Look up the Statbotics profile for a single FIRST Robotics Competition (FRC) team by team number. ' +
       'Returns lifetime/career data for that team: team name, rookie year, location (city, state/province, country), ' +
@@ -72,14 +135,13 @@ export const tools: Tool[] = [
       'Use this to answer "tell me about FRC team 254", "where is team 2056 based?", or "what is team 1678\'s career EPA?". ' +
       'The team number is the bare integer with no FRC/frc prefix (e.g. 86, not "frc86"). ' +
       'For per-season detail, use get_team_year. For filtering or browsing many teams, use get_teams.',
-    annotations: {
-      title: 'Get FRC Team Profile (Single Team)',
-      ...readOnlyAnnotations,
-    },
-    inputSchema: toMCPSchema(GetTeamInputSchema),
-  },
-  {
+    inputSchema: GetTeamInputSchema,
+    endpoint: ({ team }) => `/v3/team/${team}`,
+    responseSchema: RecordSchema,
+  }),
+  defineTool({
     name: 'get_teams',
+    title: 'List/Search FRC Teams',
     description:
       'List FIRST Robotics Competition (FRC) teams from the Statbotics database with optional filters. ' +
       'Returns an array of team profiles (number, name, location, rookie year, active flag, career EPA stats, ' +
@@ -91,14 +153,13 @@ export const tools: Tool[] = [
       'and paginate with `limit`/`offset`. ' +
       'Use this to answer "which teams in Texas are most successful?", "list all teams in the FIM district", ' +
       'or "find the top 50 teams by normalized EPA".',
-    annotations: {
-      title: 'List/Search FRC Teams',
-      ...readOnlyAnnotations,
-    },
-    inputSchema: toMCPSchema(GetTeamsInputSchema),
-  },
-  {
+    inputSchema: GetTeamsInputSchema,
+    endpoint: (args) => `/v3/teams${buildQueryString(args)}`,
+    responseSchema: RecordListSchema,
+  }),
+  defineTool({
     name: 'get_team_year',
+    title: 'Get FRC Team Season Stats (Single Team-Year)',
     description:
       "Get one team's performance summary for one specific FIRST Robotics Competition (FRC) season. " +
       "Returns the team's EPA breakdown for that year (start, pre-playoffs, end, max, mean, ranks/percentiles), " +
@@ -107,14 +168,13 @@ export const tools: Tool[] = [
       '"how many events did team 1114 attend in 2024?". ' +
       'Requires both team number (integer, no prefix) and a 4-digit year >= 2002. ' +
       'For multi-team or multi-year browsing, use get_team_years.',
-    annotations: {
-      title: 'Get FRC Team Season Stats (Single Team-Year)',
-      ...readOnlyAnnotations,
-    },
-    inputSchema: toMCPSchema(GetTeamYearInputSchema),
-  },
-  {
+    inputSchema: GetTeamYearInputSchema,
+    endpoint: ({ team, year }) => `/v3/team_year/${team}/${year}`,
+    responseSchema: RecordSchema,
+  }),
+  defineTool({
     name: 'get_team_years',
+    title: 'List/Search FRC Team Season Stats',
     description:
       'List per-season FIRST Robotics Competition (FRC) team statistics with flexible filters - useful for ' +
       'cross-team or cross-year analysis. ' +
@@ -125,14 +185,13 @@ export const tools: Tool[] = [
       'Sort with `metric`/`ascending` and paginate with `limit`/`offset`. ' +
       'Use this to answer "show team 254 in every season", "rank all teams by EPA in 2023", or ' +
       '"find the strongest teams in the New England district in 2024".',
-    annotations: {
-      title: 'List/Search FRC Team Season Stats',
-      ...readOnlyAnnotations,
-    },
-    inputSchema: toMCPSchema(GetTeamYearsInputSchema),
-  },
-  {
+    inputSchema: GetTeamYearsInputSchema,
+    endpoint: (args) => `/v3/team_years${buildQueryString(args)}`,
+    responseSchema: RecordListSchema,
+  }),
+  defineTool({
     name: 'get_event',
+    title: 'Get FRC Event Details (Single Event)',
     description:
       'Look up a single FIRST Robotics Competition (FRC) event by its event key. ' +
       'Returns metadata (event name, year, week, type, location, dates, district), aggregate EPA stats for ' +
@@ -143,14 +202,13 @@ export const tools: Tool[] = [
       'Use this to answer "what happened at 2024flor?", "show predictions for 2024cmptx", or to get ' +
       'context (week, type, location) for an event you have the key for. ' +
       'For browsing events by season, district, or week, use get_events.',
-    annotations: {
-      title: 'Get FRC Event Details (Single Event)',
-      ...readOnlyAnnotations,
-    },
-    inputSchema: toMCPSchema(GetEventInputSchema),
-  },
-  {
+    inputSchema: GetEventInputSchema,
+    endpoint: ({ event }) => `/v3/event/${event}`,
+    responseSchema: RecordSchema,
+  }),
+  defineTool({
     name: 'get_events',
+    title: 'List/Search FRC Events',
     description:
       'List FIRST Robotics Competition (FRC) events with optional filters - the discovery tool for finding ' +
       'event keys and browsing the season schedule. ' +
@@ -162,14 +220,13 @@ export const tools: Tool[] = [
       'Use this to answer "what regionals were in California in 2024?", "list all week 1 events this year", ' +
       'or "find the FRC championship divisions" (year=YEAR, type="champs_div"). ' +
       'If you need a single event you already know, use get_event.',
-    annotations: {
-      title: 'List/Search FRC Events',
-      ...readOnlyAnnotations,
-    },
-    inputSchema: toMCPSchema(GetEventsInputSchema),
-  },
-  {
+    inputSchema: GetEventsInputSchema,
+    endpoint: (args) => `/v3/events${buildQueryString(args)}`,
+    responseSchema: RecordListSchema,
+  }),
+  defineTool({
     name: 'get_team_event',
+    title: 'Get FRC Team Performance at Event (Single Team-Event)',
     description:
       "Get one team's performance at one specific FIRST Robotics Competition (FRC) event. " +
       "Returns the team's qualification rank, qualification record (W-L-T), playoff alliance and result, " +
@@ -178,14 +235,13 @@ export const tools: Tool[] = [
       'Use this to answer "how did team 2056 do at 2024onham?", "what was team 254\'s EPA at champs?", ' +
       'or "what awards did team 1114 win at their district championship?". ' +
       'For browsing many team-event combinations, use get_team_events.',
-    annotations: {
-      title: 'Get FRC Team Performance at Event (Single Team-Event)',
-      ...readOnlyAnnotations,
-    },
-    inputSchema: toMCPSchema(GetTeamEventInputSchema),
-  },
-  {
+    inputSchema: GetTeamEventInputSchema,
+    endpoint: ({ team, event }) => `/v3/team_event/${team}/${event}`,
+    responseSchema: RecordSchema,
+  }),
+  defineTool({
     name: 'get_team_events',
+    title: 'List/Search FRC Team-Event Records',
     description:
       'List FIRST Robotics Competition (FRC) team-event records with flexible filters. Each row represents ' +
       "one team's performance at one event (rank, record, EPA, awards). " +
@@ -195,14 +251,13 @@ export const tools: Tool[] = [
       'Sort with `metric`/`ascending` and paginate with `limit`/`offset`. ' +
       'Use this to answer "show every event team 254 has attended in 2024", "list all teams at 2024flor with their ranks", ' +
       'or "rank teams by EPA across all 2024 district championships".',
-    annotations: {
-      title: 'List/Search FRC Team-Event Records',
-      ...readOnlyAnnotations,
-    },
-    inputSchema: toMCPSchema(GetTeamEventsInputSchema),
-  },
-  {
+    inputSchema: GetTeamEventsInputSchema,
+    endpoint: (args) => `/v3/team_events${buildQueryString(args)}`,
+    responseSchema: RecordListSchema,
+  }),
+  defineTool({
     name: 'get_match',
+    title: 'Get FRC Match Details (Single Match)',
     description:
       'Look up a single FIRST Robotics Competition (FRC) match by its match key. ' +
       'Returns full match detail: red and blue alliance team lists, final scores by alliance and component ' +
@@ -213,14 +268,13 @@ export const tools: Tool[] = [
       'Use this to answer "who won 2024flor_qm20?", "what was the predicted vs actual score?", or to get ' +
       'alliance compositions for a known match. ' +
       'For browsing many matches, use get_matches.',
-    annotations: {
-      title: 'Get FRC Match Details (Single Match)',
-      ...readOnlyAnnotations,
-    },
-    inputSchema: toMCPSchema(GetMatchInputSchema),
-  },
-  {
+    inputSchema: GetMatchInputSchema,
+    endpoint: ({ match }) => `/v3/match/${match}`,
+    responseSchema: RecordSchema,
+  }),
+  defineTool({
     name: 'get_matches',
+    title: 'List/Search FRC Matches',
     description:
       'List FIRST Robotics Competition (FRC) matches with optional filters. ' +
       'Returns an array of match records (alliances, scores, predictions, EPA-based win probabilities, ' +
@@ -232,14 +286,13 @@ export const tools: Tool[] = [
       'Use this to answer "show all of team 254\'s matches in 2024", "list every elim match at 2024cmptx", ' +
       'or "find the highest-scoring matches of week 6". ' +
       "For per-team match contributions (a team's individual EPA in a match), use get_team_matches.",
-    annotations: {
-      title: 'List/Search FRC Matches',
-      ...readOnlyAnnotations,
-    },
-    inputSchema: toMCPSchema(GetMatchesInputSchema),
-  },
-  {
+    inputSchema: GetMatchesInputSchema,
+    endpoint: (args) => `/v3/matches${buildQueryString(args)}`,
+    responseSchema: RecordListSchema,
+  }),
+  defineTool({
     name: 'get_team_match',
+    title: 'Get FRC Team Contribution in Match (Single Team-Match)',
     description:
       "Get a single team's contribution to a single FIRST Robotics Competition (FRC) match - the per-robot " +
       'view of one match. ' +
@@ -249,14 +302,13 @@ export const tools: Tool[] = [
       '2024onham_sf2m1?". ' +
       'Requires both `team` (integer, no prefix) and `match` (match key like "2024flor_qm20"). ' +
       'For listing many team-match rows, use get_team_matches.',
-    annotations: {
-      title: 'Get FRC Team Contribution in Match (Single Team-Match)',
-      ...readOnlyAnnotations,
-    },
-    inputSchema: toMCPSchema(GetTeamMatchInputSchema),
-  },
-  {
+    inputSchema: GetTeamMatchInputSchema,
+    endpoint: ({ team, match }) => `/v3/team_match/${team}/${match}`,
+    responseSchema: RecordSchema,
+  }),
+  defineTool({
     name: 'get_team_matches',
+    title: 'List/Search FRC Team-Match Contributions',
     description:
       'List per-team match contributions across many FIRST Robotics Competition (FRC) matches. Each row is ' +
       "one team's involvement in one match (alliance, pre-match EPA, predicted contribution, outcome). " +
@@ -265,10 +317,8 @@ export const tools: Tool[] = [
       'Sort with `metric`/`ascending` and paginate with `limit`/`offset`. ' +
       'Use this to build a scouting timeline ("every match team 254 played in 2024 with their EPA contribution"), ' +
       'compare alliance partners, or compute per-team averages over a range of matches.',
-    annotations: {
-      title: 'List/Search FRC Team-Match Contributions',
-      ...readOnlyAnnotations,
-    },
-    inputSchema: toMCPSchema(GetTeamMatchesInputSchema),
-  },
+    inputSchema: GetTeamMatchesInputSchema,
+    endpoint: (args) => `/v3/team_matches${buildQueryString(args)}`,
+    responseSchema: RecordListSchema,
+  }),
 ];

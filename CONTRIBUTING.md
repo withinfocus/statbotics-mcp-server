@@ -60,8 +60,9 @@ Tests are located in `tests/*.spec.ts` and cover:
 
 - Zod schemas (`tests/schemas.spec.ts`)
 - Utility functions (`tests/utils.spec.ts`)
-- Tool definitions (`tests/tools.spec.ts`)
-- Handler functions (`tests/handlers.spec.ts`)
+- The tool table and `tools/list` output (`tests/tools.spec.ts`)
+- Tool calls through an in-memory SDK client (`tests/handlers.spec.ts`)
+- The server factory (`tests/server.spec.ts`)
 
 ### Integration Tests (Playwright)
 
@@ -73,6 +74,7 @@ pnpm run test:all                 # Run both unit and integration tests
 **Requirements:**
 
 - Project must be built first (`pnpm run build`)
+- The live Statbotics API must be up; the tests call it directly
 
 Always run both test suites when making changes.
 
@@ -81,18 +83,47 @@ Always run both test suites when making changes.
 ### Source Code
 
 - `src/index.ts` - Main server entry point
-- `src/tools.ts` - Tool definitions
-- `src/handlers.ts` - Tool execution handlers
+  - Serves the MCP server over stdio with `serveStdio(() => createServer(version))`
+  - Handles error logging and process lifecycle
+
+- `src/server.ts` - Server factory
+  - Exports `createServer(version)`, which builds an `McpServer` (from `@modelcontextprotocol/server`) and calls `registerTool()` once per entry in the `tools` table
+  - Exports `SERVER_INSTRUCTIONS`, the short guidance sent to clients
+  - Returns the server unconnected, so extensions can be attached before `serveStdio` connects it
+
+- `src/tools.ts` - Tool table
+  - Exports the `tools` array of `ToolDefinition` entries, one per MCP tool, built with `defineTool()`
+  - Each entry has: `name`, `title`, `description`, `inputSchema` (a Zod object schema), `endpoint(args)` (builds the Statbotics API path), `responseSchema` (Zod), and an optional `select`
+  - Exports `READ_ONLY_API`, the tool annotations every tool shares
+  - Both server registration and the unit tests read from this table
+
+- `src/handlers.ts` - Tool execution
+  - Exports `executeTool(tool, args)`: calls `makeApiRequest(tool.endpoint(args))`, validates the response with `tool.responseSchema`, and returns the JSON as text content
+  - Failures (HTTP, network, unexpected response shape) come back as `isError: true` results with an `Error: ...` message
+  - Input validation is not done here: the SDK validates arguments against `inputSchema` before calling the handler
+
 - `src/schemas.ts` - Zod validation schemas
+  - Parameter schemas: TeamNumberSchema, YearSchema, EventKeySchema, etc.
+  - Tool input schemas: `Get*InputSchema` (one `z.object` per tool)
+  - API response schemas: `RecordSchema` and `RecordListSchema`
+
 - `src/utils.ts` - Utility functions
+  - `log()` - Writes server logs to stderr (stdout carries the stdio JSON-RPC stream)
+  - `makeApiRequest()` - Makes HTTP requests to the Statbotics API
 
 ### Tests
 
+- `tests/tools.spec.ts` - Unit tests for the tool table and the `tools/list` output (schemas, annotations, endpoints)
+- `tests/handlers.spec.ts` - Unit tests for `tools/call` (input validation, error results) and `executeTool`
+- `tests/server.spec.ts` - Unit tests for `createServer`
 - `tests/schemas.spec.ts` - Unit tests for all Zod schemas
 - `tests/utils.spec.ts` - Unit tests for utility functions
-- `tests/tools.spec.ts` - Unit tests for tool definitions
-- `tests/handlers.spec.ts` - Unit tests for handler functions
-- `tests/integration/*.spec.ts` - Playwright integration tests
+- `tests/in-memory-client.ts` - Test helper that connects an SDK `Client` to `createServer()` over `InMemoryTransport`
+- `tests/integration/*.spec.ts` - Playwright integration tests for MCP protocol compliance, using a raw JSON-RPC stdio client (`tests/integration/mcp-client.ts`)
+
+### Adding a New Tool
+
+A tool is one `defineTool()` entry in the `tools` table in `src/tools.ts`, with no handler to write. The steps, with examples, are in the "How to Add a New Tool" section of [CLAUDE.md](CLAUDE.md).
 
 ## Code Standards
 

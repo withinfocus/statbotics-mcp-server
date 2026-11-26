@@ -46,15 +46,17 @@ test.describe('MCP Server Error Handling Tests', () => {
 
   test.describe('Tool Not Found', () => {
     test('should handle unknown tool calls', async () => {
+      // The SDK answers an unregistered tool name with a JSON-RPC
+      // invalid-params error (-32602), not an isError tool result.
       await expect(mcpClient.callTool('unknown_tool', {})).rejects.toThrow(
-        /Unknown tool/,
+        /-32602: Tool unknown_tool not found/,
       );
     });
 
     test('should handle tool name typos', async () => {
       await expect(
         mcpClient.callTool('get_tema', { team: 86 }),
-      ).rejects.toThrow(/Unknown tool/);
+      ).rejects.toThrow(/-32602: Tool get_tema not found/);
     });
   });
 

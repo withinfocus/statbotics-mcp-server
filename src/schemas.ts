@@ -199,22 +199,9 @@ export const GetTeamMatchesInputSchema = z.object({
   ...PaginationSortFields,
 });
 
-// Helper function to convert Zod schema to MCP-compatible JSON Schema
-export function toMCPSchema(zodSchema: z.ZodType): {
-  type: 'object';
-  properties?: { [key: string]: object };
-  required?: string[];
-  [key: string]: unknown;
-} {
-  const jsonSchema = z.toJSONSchema(zodSchema) as {
-    type: 'object';
-    properties?: { [key: string]: object };
-    required?: string[];
-    [key: string]: unknown;
-  };
+// Response schemas. These check the shape of a Statbotics response (one
+// record, or a list of records) and keep every field the API returns. They
+// are deliberately loose: field-level schemas come with the endpoint audit.
+export const RecordSchema = z.looseObject({});
 
-  // Remove $schema field for MCP compatibility
-  delete jsonSchema['$schema'];
-
-  return jsonSchema;
-}
+export const RecordListSchema = z.array(RecordSchema);
