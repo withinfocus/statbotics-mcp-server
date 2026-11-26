@@ -6,10 +6,39 @@ A Model Context Protocol (MCP) server that provides access to the Statbotics API
 
 - **Team Statistics**: Get EPA ratings, win rates, and historical performance for FRC teams
 - **Event Data**: Access event details, predictions, and team performance at events
-- **Match Analytics**: Retrieve match predictions, results, and team-level match statistics
+- **Match Analytics**: Retrieve match predictions and results
 - **Year-over-Year Data**: Query statistical trends from 2002 to the current year
 - **Type Safety**: All responses validated with Zod schemas
 - **API Key Optional**: Works without a key; set `STATBOTICS_API_KEY` to send one
+- **Analytics Skills**: Four skills for sizing up an event, match odds, season reports and season benchmarks
+
+## For FRC teams
+
+The server ships four skills that tell Claude how to turn Statbotics data into answers a team can use. You don't need to know any tool names. Ask in your own words and the client loads the matching skill.
+
+| Skill                | Use it                         | What you get                                                                                                                      |
+| -------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| `event-favorites`    | Before or during an event      | The teams at an event ranked by EPA, with auto, teleop and endgame breakdowns, tiers, and where your team fits                    |
+| `match-odds`         | Before a match                 | Statbotics' win probability and predicted score, and where the match is likely won or lost by phase                               |
+| `team-season-report` | Any time in the season         | A team's EPA event by event, its world, country, state and district ranks, and its strongest and weakest phases                   |
+| `season-benchmarks`  | Build season or between events | Targets from real season data (what a top-8 or champs-level robot scores) and fair comparisons across seasons with normalized EPA |
+
+Each skill has two modes. Coach mode gives a concrete answer, such as tiers or targets, states the rules it used, and says where strong teams would disagree. Analyst mode gives you the data and the caveats and leaves the decision to you. The skill picks the mode from how you ask ("what should we work on?" versus "show me the numbers"), asks once if it can't tell, and switches whenever you say so.
+
+Example prompts:
+
+- "Who are the favorites at 2025casj? We're team 649."
+- "How strong is the field at our district championship?"
+- "What are our odds in 2025casj_qm10?"
+- "Our next match, numbers only. We're team 1700 at 2025casj."
+- "How's our robot doing this season? We're 5511."
+- "Are we improving? Where do we rank in our district?"
+- "What EPA does it take to be a top-8 seed at a regional?"
+- "Was 2018 254 better than 2024 1690?"
+
+The skills are careful about what EPA can and can't tell you. EPA is estimated from alliance scores, so it can't see which robot scored what, defense, or reliability. Early in a season it leans on a team's past seasons. Raw EPA isn't comparable across seasons, so cross-season comparisons use normalized EPA. For a finished event or a played match, the skills analyze only what was known beforehand and show the real result separately.
+
+Skills are served through the [MCP Skills extension](https://modelcontextprotocol.io/extensions/skills/overview). Clients that support it include Claude, Claude Code 2.1.331 and later, and VS Code Copilot. Other MCP clients still get every tool, plus short guidance in the server's instructions. Set `STATBOTICS_MCP_SKILLS=off` to serve the tools without the skills.
 
 ## Installation
 
