@@ -8,13 +8,31 @@ export async function log(
   console.error(`[${level}]`, data);
 }
 
+/**
+ * The Statbotics API key from STATBOTICS_API_KEY, or undefined when it is
+ * unset or blank. The key is optional: it is sent as the X-API-Key header
+ * when present. Keys come from https://www.statbotics.io/apikey and are
+ * rate limited to 100 requests per minute.
+ */
+export function getApiKey(): string | undefined {
+  const key = process.env['STATBOTICS_API_KEY']?.trim();
+  return key ? key : undefined;
+}
+
+// Added to 401 and 403 errors, which Statbotics returns for a missing,
+// invalid, or revoked key.
+const API_KEY_HINT =
+  'Set STATBOTICS_API_KEY to a key from https://www.statbotics.io/apikey.';
+
 export async function makeApiRequest(endpoint: string): Promise<unknown> {
   try {
     const url = `https://api.statbotics.io${endpoint}`;
+    const apiKey = getApiKey();
 
     const response = await fetch(url, {
       headers: {
         Accept: 'application/json',
+        ...(apiKey ? { 'X-API-Key': apiKey } : {}),
       },
     });
 
@@ -23,7 +41,11 @@ export async function makeApiRequest(endpoint: string): Promise<unknown> {
       const status = [response.status, response.statusText]
         .filter(Boolean)
         .join(' ');
-      const errorMessage = `Statbotics API request failed: ${status} for endpoint ${endpoint}`;
+      const hint =
+        response.status === 401 || response.status === 403
+          ? `. ${API_KEY_HINT}`
+          : '';
+      const errorMessage = `Statbotics API request failed: ${status} for endpoint ${endpoint}${hint}`;
       await log('error', errorMessage);
       throw new Error(errorMessage);
     }

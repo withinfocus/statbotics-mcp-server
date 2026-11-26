@@ -21,7 +21,7 @@ pnpm install --frozen-lockfile
 pnpm run build
 ```
 
-Note: No API key is required. The Statbotics API is freely accessible.
+Note: An API key is optional. If you have one from <https://www.statbotics.io/apikey>, set it as `STATBOTICS_API_KEY`.
 
 ## Development Workflow
 
@@ -109,7 +109,8 @@ Always run both test suites when making changes.
 
 - `src/utils.ts` - Utility functions
   - `log()` - Writes server logs to stderr (stdout carries the stdio JSON-RPC stream)
-  - `makeApiRequest()` - Makes HTTP requests to the Statbotics API
+  - `getApiKey()` - Reads the optional `STATBOTICS_API_KEY` environment variable
+  - `makeApiRequest()` - Makes HTTP requests to the Statbotics API, with the `X-API-Key` header when a key is set
 
 ### Tests
 
