@@ -9,53 +9,21 @@ savePrefix: ""
 allowBuilds:
   # Unpacks the bundled web, CLI, and TUI clients that `pnpm run inspect` runs.
   "@modelcontextprotocol/inspector": true
-  # Pulled in by the inspector. Ships prebuilt platform bindings, so the
+  # Pulled in by jest-haste-map. Ships prebuilt platform bindings, so the
   # build-from-source fallback never has to run.
   "@parcel/watcher": false
   # Selects the prebuilt native binding for the current platform.
   unrs-resolver: true
 
-# Security floors for transitive dependencies. Each is capped to the major
-# its dependent actually declares, so an override never drags in a major
-# that the dependent has not claimed to support. minimatch and glob are the
-# exceptions, explained below. Drop each one once the dependent requires a
-# patched version on its own.
+# jest's coverage tooling (babel-plugin-istanbul > test-exclude), eslint, and
+# typescript-eslint pull in minimatch 9 and 10 and glob 10 and 13. Both carry
+# a medium-severity advisory (GHSA-g3hv-75wg-m249 for minimatch,
+# GHSA-3g3m-2fjr-6pw4 for glob) that is only fixed in a new major: minimatch
+# 11.0.1 and glob 14.0.2. No fix was backported. The majors drop APIs these
+# consumers do not call (makeRe, the AST class, the debug option) and keep the
+# CommonJS builds jest requires, so the override is a transitive major on
+# purpose. Dev only. Drop these once test-exclude, eslint, and
+# typescript-eslint move to the patched majors.
 overrides:
-  # ajv -> fast-uri 3.1.5. Host confusion via percent-encoded scheme
-  # normalization and via skipped IDN canonicalization, plus SSRF via
-  # malformed IPv6 normalization and via repeated hostname percent-decoding.
-  # Fixed in 3.1.6. 3.1.8 then had scheme injection and spoofing, host
-  # confusion via WHATWG canonicalization, and improper path equivalence,
-  # all fixed in 3.1.9. ajv asks for ^3.0.1.
-  fast-uri: "^3.1.9"
-  # jest -> @istanbuljs/load-nyc-config -> js-yaml 3.15.1. Denial of service
-  # via merge keys with empty sources. Fixed in 3.15.2; load-nyc-config asks
-  # for ^3.13.1.
-  js-yaml: "^3.15.2"
-  # postcss -> nanoid 3.3.17. A custom generator loops indefinitely when the
-  # requested size is zero. Fixed in 3.3.18; postcss asks for ^3.3.17.
-  nanoid: "^3.3.18"
-  # express -> qs 6.15.3. Array-limit bypass via bracket-key comma parsing,
-  # and denial of service via an attacker-controlled isBuffer. Both fixed in
-  # 6.16.0. 6.16.0 then had a denial of service in stringify with arrayFormat
-  # "comma", fixed in 6.16.1. express asks for ^6.16.0.
-  qs: "^6.16.1"
-  # eslint, typescript-eslint, and jest's coverage tooling -> minimatch 9 and
-  # 10, and glob 10 and 13. Pattern amplification denial of service in
-  # minimatch (GHSA-g3hv-75wg-m249) and an AbortSignal cancellation bypass in
-  # glob (GHSA-3g3m-2fjr-6pw4), fixed only in minimatch 11.0.1 and glob
-  # 14.0.2 with no backport. These overrides force a transitive major on
-  # purpose. The new majors drop APIs these consumers do not call (makeRe,
-  # the AST class, the debug option) and keep the CommonJS builds jest
-  # requires. Moving minimatch 9 off the tree also retires brace-expansion
-  # 2.1.4 and its three advisories. Dev only.
   minimatch: "^11.0.1"
   glob: "^14.0.2"
-
-# jest-config -> deepmerge 4.3.1, the latest release. Prototype poisoning
-# (GHSA-gcqx-w48m-w2h4, low) with no fixed release. jest only merges its own
-# config objects with it, so untrusted input never reaches it. Mirrored in
-# osv-scanner.toml. Remove once a fixed deepmerge ships.
-auditConfig:
-  ignoreGhsas:
-    - GHSA-gcqx-w48m-w2h4

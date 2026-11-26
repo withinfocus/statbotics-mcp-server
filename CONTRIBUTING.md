@@ -2,8 +2,8 @@
 
 ## Prerequisites
 
-- Node.js 24
-- pnpm 11+ (`corepack enable`)
+- Node.js 26
+- pnpm 12+
 
 ## Development Setup
 

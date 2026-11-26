@@ -53,6 +53,20 @@ describe('Utility functions', () => {
       );
     });
 
+    it('should omit an empty status text from API errors', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        statusText: '',
+      } as Response);
+
+      const { makeApiRequest } = await import('../src/utils.js');
+
+      await expect(makeApiRequest('/v3/team/999999')).rejects.toThrow(
+        'Statbotics API request failed: 404 for endpoint /v3/team/999999',
+      );
+    });
+
     it('should construct correct URL', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
