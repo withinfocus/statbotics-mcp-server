@@ -10,13 +10,19 @@ export async function log(
 
 /**
  * The Statbotics API key from STATBOTICS_API_KEY, or undefined when it is
- * unset or blank. The key is optional: it is sent as the X-API-Key header
+ * unset, blank, or an unexpanded `${...}` placeholder. The key is optional: it is sent as the X-API-Key header
  * when present. Keys come from https://www.statbotics.io/apikey and are
  * rate limited to 100 requests per minute.
  */
 export function getApiKey(): string | undefined {
   const key = process.env['STATBOTICS_API_KEY']?.trim();
-  return key ? key : undefined;
+  // A host that leaves a template unexpanded (for example a Claude plugin's
+  // `${user_config.statbotics_api_key}` with no saved value) is the same as
+  // no key, rather than a key Statbotics would reject.
+  if (!key || /^\$\{.*\}$/.test(key)) {
+    return undefined;
+  }
+  return key;
 }
 
 // Added to 401 and 403 errors, which Statbotics returns for a missing,

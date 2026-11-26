@@ -42,7 +42,17 @@ Skills are served through the [MCP Skills extension](https://modelcontextprotoco
 
 ## Installation
 
-### npm (Recommended)
+### Claude plugin
+
+In Claude Code, install the plugin from this repository. It adds the server and the four skills:
+
+```text
+/plugin install statbotics --marketplace withinfocus/statbotics-mcp-server
+```
+
+The plugin runs the server on your computer, so it works in Claude Code and in Cowork sessions on your computer. It needs Node.js 26 or later. It asks for an optional Statbotics API key; leave it blank to use the API without one. See [plugin/README.md](plugin/README.md).
+
+### npm
 
 ```bash
 npm install -g @withinfocus/statbotics-mcp-server

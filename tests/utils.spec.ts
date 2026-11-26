@@ -186,6 +186,14 @@ describe('Utility functions', () => {
       expect(sentHeaders()).toMatchObject({ 'X-API-Key': 'test-key' });
     });
 
+    it('should treat an unexpanded placeholder as unset', async () => {
+      process.env['STATBOTICS_API_KEY'] = '${user_config.statbotics_api_key}';
+
+      const { getApiKey } = await import('../src/utils.js');
+
+      expect(getApiKey()).toBeUndefined();
+    });
+
     it('should treat a blank STATBOTICS_API_KEY as unset', async () => {
       process.env['STATBOTICS_API_KEY'] = '  ';
 
